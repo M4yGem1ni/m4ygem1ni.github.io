@@ -2,7 +2,7 @@
 title: Vector Fitting
 description: Summary Of Vector Fitting
 slug: vector-fitting
-date: 2025-11-20 00:00:00+0000
+date: 2025-11-20 08:00:00+0000
 image: cover.jpg
 categories:
     - algorithm
