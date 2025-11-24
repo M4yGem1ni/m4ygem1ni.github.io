@@ -250,15 +250,203 @@ $$
 在原来的最小二乘矩阵内加入一行惩罚项，并对权重进行归一化。
 惩罚项会阻止最小二乘优化到平凡零解的情况。
 
-### 矩阵计算
-#### 归一化
+### 矩阵计算极点
 #### 状态空间
-
-### 评估算法
+使用状态空间方程表示系统,A矩阵为
+$$
+\begin{align}
+A &= diag(p_1,p_2,...,p_N)\\
+B &= [1,1,...,1]\\
+C &= [r_1,r_2,...,r_n]\\
+D &= r_0\\
+D(s)&=C(sI−A)−B+D
+\end{align}
+$$
+其中
+| 矩阵    | 维度           | 含义                |
+| ----- | ------------ | ----------------- |
+| **A** | $(n \times n)$ | 极点位置，系统动态   |
+| **B** | $(n \times m)$ | 输入如何激发每个极点        |
+| **C** | $(p \times n)$ | 每个极点对输出的贡献权重        |
+| **D** | $(p \times m)$ | 直接传输项 |
 
 ### 算法优化
-#### 减少计算量
 #### 并行化
+在无源网络中
+* 极点对应物理系统的 **固有模态**。系统特性不会随输入变化。
+* 一个多端口网络的所有传输函数元素都来自同一个系统，因此物理极点应该是相同的。
+* 因此 **所有 $H_{q,m}(s)$ 共享同一组极点 $p_n$**。
+
+因此，可以直接将最小二乘改写为如下形式（为了直观，下列的公式没有添加惩罚项）
+$$
+\begin{bmatrix}
+\Phi_0^{(i)} & 0 & \cdots & 0 & -D_{H_{11}}\,\Phi_1^{(i)} \\
+0 & \Phi_0^{(i)} & \ddots & \vdots & -D_{H_{21}}\,\Phi_1^{(i)} \\
+\vdots & \ddots & \ddots & 0 & \vdots \\
+0 & \cdots & 0 & \Phi_0^{(i)} & -D_{H_{\bar q \bar m}}\,\Phi_1^{(i)}
+\end{bmatrix}
+\begin{bmatrix}
+c_{H_{11}}^{(i)} \\
+c_{H_{21}}^{(i)} \\
+\vdots \\
+c_{H_{\bar q \bar m}}^{(i)} \\
+c_w^{(i)}
+\end{bmatrix}
+=\
+\begin{bmatrix}
+V_{H_{11}} \\
+V_{H_{21}} \\
+\vdots \\
+V_{H_{\bar q \bar m}}
+\end{bmatrix}
+$$
+
+使用增广矩阵，将多个端口及其响应同时添加到线性方程中，同时进行拟合。
+
+#### 实数替代复数
+在原始基于部分分式的状态空间实现中，复数极点会导致 (A) 和 (C) 含有复数元素。而复数乘法的计算量约为实数的 4 倍，因此有必要通过**变基**将整个系统转化为等价的 **全实数状态空间模型**，从而显著降低计算复杂度。
+
+##### 极点结构特性
+
+由拉普拉斯变换（以及系统实系数假设）可知，极点只能是：
+
+1. **实极点**：$p \in \mathbb{R}$
+2. **复共轭极点对**：$p = a + jb,\quad p^* = a - jb$
+
+因此状态空间中对应的每个复共轭对可以被替换为一个等价的 **二维实子系统**。
+
+##### 复极点的实化变换
+
+对一对共轭极点：
+
+$$
+p = a + jb,\qquad p^* = a - jb,
+$$
+
+将其组成向量：
+
+$$
+\begin{bmatrix}p & \ p^* \end{bmatrix}
+$$
+
+并引入线性变换矩阵：
+
+$$
+T=
+\begin{bmatrix}
+1 & 1 \\
+i & -i
+\end{bmatrix},
+$$
+
+则：
+
+$$
+T * \begin{bmatrix}p , p^* \end{bmatrix}^T=\
+\begin{bmatrix}
+p + p^* ,
+i(p - p^*)
+\end{bmatrix}^T\\
+=\
+\begin{bmatrix}
+2a ,2b
+\end{bmatrix}.
+$$
+**矩阵 (T) 将一对共轭极点映射为两个实数参数 (a) 与 (b)**（分别对应极点的实部与虚部）
+
+##### 在状态空间矩阵中的应用
+
+原始的 (A) 和 (C) 是由所有极点和残差组成的
+变基后：
+
+* **实极点对应的 1×1 实块保持不变**
+* **每对复共轭极点被替换为一个 2×2 的实 Jordan 模态块**
+
+新的实数状态矩阵形式为：
+
+$$
+\begin{align}
+&A_{\text{real}} =
+\begin{bmatrix}
+A_{\text{real poles}} & 0 \\
+0 &
+\begin{matrix}
+a & -b \\
+b & a
+\end{matrix}
+\end{bmatrix}
+\end{align}
+$$
+
+分块矩阵为：
+$$
+\begin{align}
+&A_{\text{blk}}=\begin{bmatrix}a & -b\\
+ b & a\end{bmatrix}\\
+&B_{\text{blk}}=\begin{bmatrix}1,0\end{bmatrix}^T\\
+&C_{\text{blk}}=\begin{bmatrix}2\Re(r) & 2\Im(r)\end{bmatrix}\\
+\end{align}
+$$
+
+证明分块的结果仍为极点-残差形式
+$$
+r = \alpha + j\beta\\
+C_{\text{blk}}(sI-A_{\text{blk}})^{-1}B_{\text{blk}}
+=\frac{2\alpha (s-a)+2b\beta}{(s-a)^2+b^2}
+=\frac{r}{s-p}+\frac{r^*}{s-p^*}.
+$$
+
+对应的 (C) 也同步应用变换，使其完全实数化。
+
+这样就将整个系统转换为 **全实数状态空间模型**，避免了复数运算，提升数值效率与稳定性。
+
+同时,应该对如下公式进行最小二乘计算，求得C后代入状态方程求解。(这里为了方便理解，没有将惩罚项加入)
+$$
+\begin{align}
+A &= \
+\left[
+\begin{matrix}
+\Re{\Phi_0^{(i)}} & 0 & \dots & -\Re {D_{H_{11}} \Phi_1^{(i)}} \\
+\Im{\Phi_0^{(i)}} & 0 & \dots & -\Im {D_{H_{11}} \Phi_1^{(i)}} \\
+\vdots & & & \vdots \\
+0 & \dots & \Re{\Phi_0^{(i)}} & -\Re{ D_{H_{\bar{q}*m}} \Phi_1^{(i)} } \\
+0 & \dots & \Im{\Phi_0^{(i)}} & -\Im{ D*{H_{\bar{q}_m}} \Phi_1^{(i)} }
+\end{matrix} * [c]
+\right]
+\\
+x &= [c_{H_{11}}^{(i)},...,c_{H_{qm}}^{(i)},c_w^{(i)}]^T\\
+b&=[\Re V_{H_{11}},\Im V_{H_{11}},...,\Re V_{H_{qm}},\Im V_{H_{qm}}]
+\end{align}
+$$
+
+#### QR分解
+在 Vector Fitting（VF）中：迭代的目的**目标不是求分子/分母全部系数，而是迭代更新极点**
+极点由分母决定，那为什么还需要让分子系数参与迭代呢？
+
+因此，直接借用QR分解，将最小二乘矩阵分解为正交阵Q和上三角矩阵R
+$$
+\begin{align}
+\left[ \Phi_0^{(i)} ~~-D_{H_{qm}}\Phi_1^{(i)} \right]
+= \left[ Q_{qm}^1~~ Q_{qm}^2 \right]
+\begin{bmatrix}
+R_{qm}^{11} & R_{qm}^{12} \\
+0 & R_{qm}^{22}
+\end{bmatrix}
+\end{align}
+$$
+
+因此整个系统就能被缩减为：
+
+$$
+\begin{align}
+R_{qm}^{22} c_w^{(i)}=
+(Q_{qm}^2)^T V_{H_{qm}}
+\end{align}
+$$
+
+直到迭代完成，再求一次完整的最小二乘，即可获取所有端口的分子系数，最后再代入状态方程求得频率响应。
+
+#### 正交化
 
 ### 改进算法
 
