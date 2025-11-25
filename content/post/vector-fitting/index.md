@@ -709,3 +709,12 @@ A的特征值就是极点
 >
 >这是对“求解”思想的一次重新理解：
 >不是一锤定音，而是构造一个朝向真相的路径。
+
+---
+**参考文献**
+[1] arXiv:1908.08977v1 [physics.comp-ph] 
+https://doi.org/10.48550/arXiv.1908.08977
+[2] D. Deschrijver, B. Haegeman and T. Dhaene, "Orthonormal Vector Fitting: A Robust Macromodeling Tool for Rational Approximation of Frequency Domain Responses," in IEEE Transactions on Advanced Packaging, vol. 30, no. 2, pp. 216-225, May 2007, doi: 10.1109/TADVP.2006.879429. keywords: {Robustness;Frequency domain analysis;Equations;Circuit simulation;Numerical stability;System identification;Design optimization;Electronics packaging;Linear approximation;Vectors;Macromodeling;rational functions;system identification},
+[3] Stefano Grivet-Talocia; Bjorn Gustavsen, "Advanced Vector Fitting for Multiport Problems," in Passive Macromodeling: Theory and Applications , Wiley, 2016, pp.307-364, doi: 10.1002/9781119140931.ch8.
+keywords: {Vectors;Standards;Lead;Ions;Fitting;State-space methods;Sparse matrices},
+[4] 
