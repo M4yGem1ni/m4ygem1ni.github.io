@@ -1,0 +1,965 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>This is MayGemini.</title><link>https://m4ygem1ni.github.io/</link><description>Recent content on This is MayGemini.</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Thu, 20 Nov 2025 08:00:00 +0000</lastBuildDate><atom:link href="https://m4ygem1ni.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>Vector Fitting</title><link>https://m4ygem1ni.github.io/p/vector-fitting/</link><pubDate>Thu, 20 Nov 2025 08:00:00 +0000</pubDate><guid>https://m4ygem1ni.github.io/p/vector-fitting/</guid><description>&lt;img src="https://m4ygem1ni.github.io/p/vector-fitting/cover.jpg" alt="Featured image of post Vector Fitting" /&gt;&lt;blockquote&gt;
+&lt;p&gt;正在施工中！
+todo list:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;添加正交基证明&lt;/li&gt;
+&lt;li&gt;撰写参数化思路&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/blockquote&gt;
+&lt;!-- more --&gt;
+&lt;h2 id="开始"&gt;开始
+&lt;/h2&gt;&lt;p&gt;Vector Fitting算法算是我接触的第一个算法了，也是我第一次使用&lt;code&gt;纸笔&lt;/code&gt;和&lt;code&gt;numpy&lt;/code&gt;推导实现的。
+这个算法我学到了很多，并且在&lt;code&gt;sckit-rk&lt;/code&gt;库的基础上进一步完善。&lt;/p&gt;
+&lt;h2 id="引入"&gt;引入
+&lt;/h2&gt;&lt;p&gt;为什么我们需要vector fitting 算法。&lt;/p&gt;
+&lt;p&gt;仿真是及其消耗时间和算力的行为，在进行设计的时候应该减少仿真的次数，用尽可能少的频点获取带宽内的响应。&lt;/p&gt;
+&lt;p&gt;数据点极少的情况下，通常会进行&lt;strong&gt;内插&lt;/strong&gt;的方式扩充频点。这对于一个物理可实现的系统来说是毁灭性打击。&lt;/p&gt;
+&lt;p&gt;不论是使用线性内插还是,cubic内插，都会破坏数据的连续性，尤其是两个频点之间存在极点时，极点可能被跳过。此时响应会在史密斯圆图上走出一条不连续的曲线，结果也就失去了物理意义。&lt;/p&gt;
+&lt;p&gt;vector fitting的意义是，使用有限多个频点，建模无源网络的频率响应。使得响应的各个点连续，具有物理意义。&lt;/p&gt;
+&lt;h2 id="vector-fitting原理"&gt;vector fitting原理
+&lt;/h2&gt;&lt;p&gt;已知一个无源网络的频率响应往往可以使用有理函数进行表示
+&lt;/p&gt;
+$$
+\begin{align}
+H(s)=\frac{N(s)}{D(s)}=\frac{\sum_{n=0}^{N} a_ns^n}{\sum_{n=0}^{N} b_ns^n}
+\end{align}
+$$&lt;p&gt;
+N(s)和D(s)都是幂函数，而幂函数在机器学习中广泛使用。因此首先选用多项式基$s^N$作为拟合的基底&lt;/p&gt;
+&lt;h2 id="算法初步设计"&gt;算法初步设计
+&lt;/h2&gt;&lt;p&gt;既然已经得到了需要拟合的模型，那么直接与仿真数据做对比，一般使用l2范数，方便做最小二乘计算最优参数&lt;/p&gt;
+$$
+\begin{align}
+e^2=\frac{1}{K}\sum^{K}_{k=1}|H_k-\widetilde{H}(jw_k)|^2
+\end{align}
+$$&lt;p&gt;最小二乘的目标是最小化$e^2$，使得拟合结果尽量贴近真实值&lt;/p&gt;
+&lt;h3 id="将非线性问题转化为线性问题"&gt;将非线性问题转化为线性问题
+&lt;/h3&gt;&lt;p&gt;(3)式展开后明显是一个非线性最小化问题
+&lt;/p&gt;
+$$
+\begin{align}
+e^2 = \frac{1}{k}\sum_{k=1}^{\bar{k}} \left|H_k \frac{\sum_{n=0}^{\bar{n}} b_n(j\omega_k)^n - \sum_{n=0}^{\bar{n}} a_n(j\omega_k)^n}{\sum_{n=0}^{\bar{n}} b_n(j\omega_k)^n}\right|^2
+\end{align}
+$$&lt;p&gt;
+在实际计算中需要将其转换为线性问题，才能高效的使用QR分解等方法求解。&lt;/p&gt;
+&lt;p&gt;最简单的方法便是levy迭代，直接忽略分母，保留分子作为优化目标&lt;/p&gt;
+$$
+\begin{align}
+\left(e_L\right)^2 = \frac{1}{k}\sum_{k=1}^{\bar{k}} \left|H_k \sum_{n=0}^{\bar{n}} b_n(j\omega_k)^n - \sum_{n=0}^{\bar{n}} a_n(j\omega_k)^n\right|^2
+\end{align}
+$$&lt;p&gt;使用levy迭代，虽然将非线性问题转化为了线性问题。但是，引入了诸多缺陷。&lt;/p&gt;
+&lt;p&gt;首先是删去分母之后，解的精度下降。&lt;/p&gt;
+&lt;p&gt;其次，也是最重要的一点，幂函数基本身就高度不正交，且随频率的增大急剧增大。如果将其写作一个矩阵，这个矩阵叫做范德蒙德病态矩阵。高阶项的权重远远大于低阶项，导致在计算最小二乘的时候，低阶项的系数被忽略，迭代后不收敛。&lt;/p&gt;
+&lt;p&gt;为了解决病态问题，需要引入SK迭代，来归一化每一项的系数&lt;/p&gt;
+&lt;h3 id="权重问题"&gt;权重问题
+&lt;/h3&gt;$$
+\begin{align}
+\left(e_{SK}^{(i)}\right)^2 &amp;= \frac{1}{K} \sum_{k=1}^{K} \left| \frac{H_k \sum_{n=0}^{N} b_n^{(i)}(j\omega_k)^n - \sum_{n=0}^{N} a_n^{(i)}(j\omega_k)^n}{\sum_{n=0}^{N} b_n^{(i-1)}(j\omega_k)^n} \right|^2
+\end{align}
+$$&lt;p&gt;前一项的系数$b_n^{(i-1)}$是常数，所以（5）式的分母就是常数，使用前一项的分母归一化此时的每一项，经过多次迭代，便可以将每一项的最小二乘权重归一化到&lt;code&gt;1&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id="变基"&gt;变基
+&lt;/h3&gt;&lt;p&gt;虽然我们已经使用了sk迭代，但是$s^n$受频率的影响非常大，我们又选择它作为基，所以不论怎么改善，各个系数之间的权重永远是不一样的。这导致在公式写为矩阵后，仍然包含范德蒙德块。进而导致系数不收敛。&lt;/p&gt;
+&lt;p&gt;此时便需要考虑更换基，使用与频率无关或者关系小的基。&lt;/p&gt;
+&lt;p&gt;通过 “极点预设” + “分母线性化” 得到一个新的表达式，将多项式基转化为部分分式基&lt;/p&gt;
+$$
+\begin{align}
+H(s)&amp;=\frac{\sum_{n=0}^{N} a_ns^n}{\sum_{n=0}^{N} b_ns^n} \\
+&amp;=\frac{\xi_1\prod_{m=0}^{M}(s-z_m)}{\xi_2\prod_{n=0}^{N}(s-p_n)}
+\end{align}
+$$&lt;p&gt;对于分母可写作如下形式(分子也一样)
+&lt;/p&gt;
+$$
+\begin{align}
+d(s) = \xi_2 s^{N} \prod_{n=1}^{N} \left(1 - \frac{p_n}{s}\right)
+\end{align}
+$$&lt;p&gt;分子分母同时出现$s^N$项，便可以将其消去，归一化$\xi$项。同时再对其进行部分分式展开，便可以得到响应的部分分式形式&lt;/p&gt;
+$$
+\begin{align}
+\widetilde{H}(s)=c_0+se+\sum_{k=1}^{K} \frac{c_k}{s-p_k}
+\end{align}
+$$&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;物理意义&lt;/strong&gt;
+K阶幂函数有K个解，而每个&lt;strong&gt;分母&lt;/strong&gt;的解都对应一个极点，于是可以写成如下形式
+写成部分分式求和形式之后，这里只保留了一阶系数&lt;strong&gt;se&lt;/strong&gt;，当然，如果你觉得分子的阶数（系统的零点数量）比分母更多，欢迎添加二阶，三阶系数。但是在无源网络中这是不可能的，零点数量往往比极点少。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;再带入SK迭代，便可以拿到第i次迭代的表达式&lt;/p&gt;
+$$
+\begin{align}
+n^{(i)} &amp;= se^{(i)}+ w_0^{(i)} + \sum_{n=1}^{\bar{n}} \frac{w_n^{(i)}}{s - p_n^{(0)}}\\
+d^{(i)} &amp;= 1 + \sum_{n=1}^{\bar{n}} \frac{r_n^{(i)}}{s - p_n^{(0)}}
+\end{align}
+$$&lt;p&gt;此时我们选取的基为$\frac{1}{s-p_n^{(0)}}$，$p_0$是在s的范围中，选取的n对共轭极点。由于sk迭代对分母的归一化作用，再无穷次迭代后，分母趋于1，则直接使用1作为分母的常数&lt;/p&gt;
+&lt;p&gt;此时的最小二乘表达式
+&lt;/p&gt;
+$$
+\left(e_{SK}^{(i)}\right)^2 = \frac{1}{K} \sum_{k=1}^{K} \left| \frac{H_k d^{(i)}(j\omega_k) - n^{(i)}(j\omega_k)}{d^{(i-1)}(j\omega_k)} \right|^2
+$$&lt;h3 id="写为矩阵的形式"&gt;写为矩阵的形式
+&lt;/h3&gt;$$
+\begin{align}
+\begin{bmatrix}
+\Phi_0^{(i)} &amp; -D_H \Phi_1^{(i)}
+\end{bmatrix}
+\begin{bmatrix}
+c_H^{(i)} \\[4pt]
+c_w^{(i)}
+\end{bmatrix}
+= V_H
+\end{align}
+$$&lt;p&gt;其中&lt;/p&gt;
+$$
+\begin{align}
+\Phi_0^{(i)} &amp;=
+\begin{bmatrix}
+1 &amp; \frac{1}{j\omega_1 - p_1^{(i-1)}} &amp; \cdots &amp; \frac{1}{j\omega_1 - p_{\bar n}^{(i-1)}} \\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+1 &amp; \frac{1}{j\omega_{\bar k} - p_1^{(i-1)}} &amp; \cdots &amp; \frac{1}{j\omega_{\bar k} - p_{\bar n}^{(i-1)}}
+\end{bmatrix}\\
+\
+\Phi_1^{(i)} &amp;=
+\begin{bmatrix}
+\frac{1}{j\omega_1 - p_1^{(i-1)}} &amp; \cdots &amp; \frac{1}{j\omega_1 - p_{\bar n}^{(i-1)}} \\
+\vdots &amp; \ddots &amp; \vdots \\
+\frac{1}{j\omega_{\bar k} - p_1^{(i-1)}} &amp; \cdots &amp; \frac{1}{j\omega_{\bar k} - p_{\bar n}^{(i-1)}}
+\end{bmatrix}\\
+\
+D_H &amp;= \mathrm{diag}\{H_1,\ldots,H_{\bar k}\}\\
+\
+V_H &amp;= [H_1 \; \cdots \; H_{\bar k}]^T\\
+\
+c_H^{(i)} &amp;= [\, r_0^{(i)} \; \cdots \; r_{\bar n}^{(i)} \,]^T\\
+\
+c_w^{(i)} &amp;= [\, w_1^{(i)} \; \cdots \; w_{\bar n}^{(i)} \,]^T
+\end{align}
+$$&lt;h3 id="评估拟合情况"&gt;评估拟合情况
+&lt;/h3&gt;$$
+\begin{align}
+w^{(i)}(s) &amp;=\frac{d^{(i)}(s)}{d^{(i-1)}(s)}\\
+&amp;= \frac{1 + \sum_{n=1}^{\bar{n}} \frac{d_n^{(i)}}{s - p_n^{(0)}}}{1 + \sum_{n=1}^{\bar{n}} \frac{d_n^{(i-1)}}{s - p_n^{(0)}}}\\
+&amp;= \frac{\prod(s - p_n^{(i)}) / \prod(s - p_n^{(0)})}{\prod(s - p_n^{(i-1)}) / \prod(s - p_n^{(0)})}\\
+&amp;= 1 + \sum_{n=1}^{\bar{n}} \frac{w_n^{(i)}}{s - p_n^{(i-1)}}
+\end{align}
+$$&lt;p&gt;经过迭代后，$\omega$的一范数需要收敛到1，否则就是拟合失败&lt;/p&gt;
+&lt;h2 id="进一步设计"&gt;进一步设计
+&lt;/h2&gt;&lt;p&gt;公式(11)中为什么要出现&lt;code&gt;1&lt;/code&gt;这个常数项呢。有两方面的考虑&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;分母在收敛的情况下最终一定会趋于&lt;code&gt;1&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;防止$d^{i}/d^{i-1}=0$导致&lt;code&gt;平凡零解&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;但是，这也导致缺少了一个自由度，使得算法收敛变慢。因此需要将其转换为待拟合的变量，参与最小二乘计算。并使用&lt;code&gt;惩罚项&lt;/code&gt;约束平凡零解。&lt;/p&gt;
+&lt;h3 id="平凡零解"&gt;平凡零解
+&lt;/h3&gt;&lt;p&gt;在算法中，如果分母写成：&lt;/p&gt;
+$$
+d^{(i)}(s)=\sum_{n=1}^{\bar n}\frac{r_n^{(i)}}{s-p_n^{(0)}}
+$$&lt;p&gt;则最小二乘会自然给出：&lt;/p&gt;
+$$
+r_1^{(i)}=\cdots=r_{\bar n}^{(i)}=0
+$$&lt;p&gt;即：&lt;/p&gt;
+$$
+d^{(i)}(s)=0
+$$&lt;p&gt;这是一个&lt;strong&gt;无意义的、退化的解&lt;/strong&gt;，它会让 VF：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;得不到权函数&lt;/li&gt;
+&lt;li&gt;得不到极点更新&lt;/li&gt;
+&lt;li&gt;迭代失效&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;所以最初设计加上 &lt;strong&gt;常数项 1&lt;/strong&gt; 来避免这一问题。&lt;/p&gt;
+&lt;h4 id="设计惩罚项"&gt;设计惩罚项
+&lt;/h4&gt;$$
+\begin{align}
+&amp;\begin{bmatrix}
+\Phi_0^{(i)} &amp; -D_H \Phi_1^{(i)} \\
+0 &amp; \frac{\beta}{k} (1_k)^T \Phi_0^{(i)}
+\end{bmatrix}
+\begin{bmatrix}
+c_H^{(i)} \\
+c_w^{(i)}
+\end{bmatrix}=
+\begin{bmatrix}
+0 \\
+\beta
+\end{bmatrix}\\
+\
+&amp;w^{(i)}(s) = w_0^{(i)} + \sum_{n=1}^{\bar n} \frac{w_n^{(i)}}{s - p_n^{(i-1)}}\\
+\
+&amp;\beta = \sqrt{ \sum_{k=1}^{\bar{k}} |H_k|^2 }
+\end{align}
+$$&lt;p&gt;在原来的最小二乘矩阵内加入一行惩罚项，并对权重进行归一化。
+惩罚项会阻止最小二乘优化到平凡零解的情况。&lt;/p&gt;
+&lt;h2 id="矩阵计算极点"&gt;矩阵计算极点
+&lt;/h2&gt;&lt;h3 id="状态空间"&gt;状态空间
+&lt;/h3&gt;&lt;p&gt;使用状态空间方程表示系统,A矩阵为
+&lt;/p&gt;
+$$
+\begin{align}
+A &amp;= diag(p_1,p_2,...,p_N)\\
+B &amp;= [1,1,...,1]\\
+C &amp;= [r_1,r_2,...,r_n]\\
+D &amp;= r_0\\
+D(s)&amp;=C(sI−A)^{−1}B+D
+\end{align}
+$$&lt;p&gt;
+其中&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;矩阵&lt;/th&gt;
+&lt;th&gt;维度&lt;/th&gt;
+&lt;th&gt;含义&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;A&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;$(n \times n)$&lt;/td&gt;
+&lt;td&gt;极点位置，系统动态&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;B&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;$(n \times m)$&lt;/td&gt;
+&lt;td&gt;输入如何激发每个极点&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;C&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;$(p \times n)$&lt;/td&gt;
+&lt;td&gt;每个极点对输出的贡献权重&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;D&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;$(p \times m)$&lt;/td&gt;
+&lt;td&gt;直接传输项&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id="算法优化"&gt;算法优化
+&lt;/h2&gt;&lt;h3 id="并行化"&gt;并行化
+&lt;/h3&gt;&lt;p&gt;在无源网络中&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;极点对应物理系统的 &lt;strong&gt;固有模态&lt;/strong&gt;。系统特性不会随输入变化。&lt;/li&gt;
+&lt;li&gt;一个多端口网络的所有传输函数元素都来自同一个系统，因此物理极点应该是相同的。&lt;/li&gt;
+&lt;li&gt;因此 &lt;strong&gt;所有 $H_{q,m}(s)$ 共享同一组极点 $p_n$&lt;/strong&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;因此，可以直接将最小二乘改写为如下形式（为了直观，下列的公式没有添加惩罚项）
+&lt;/p&gt;
+$$
+\begin{bmatrix}
+\Phi_0^{(i)} &amp; 0 &amp; \cdots &amp; 0 &amp; -D_{H_{11}}\,\Phi_1^{(i)} \\
+0 &amp; \Phi_0^{(i)} &amp; \ddots &amp; \vdots &amp; -D_{H_{21}}\,\Phi_1^{(i)} \\
+\vdots &amp; \ddots &amp; \ddots &amp; 0 &amp; \vdots \\
+0 &amp; \cdots &amp; 0 &amp; \Phi_0^{(i)} &amp; -D_{H_{\bar q \bar m}}\,\Phi_1^{(i)}
+\end{bmatrix}
+\begin{bmatrix}
+c_{H_{11}}^{(i)} \\
+c_{H_{21}}^{(i)} \\
+\vdots \\
+c_{H_{\bar q \bar m}}^{(i)} \\
+c_w^{(i)}
+\end{bmatrix}
+=\
+\begin{bmatrix}
+V_{H_{11}} \\
+V_{H_{21}} \\
+\vdots \\
+V_{H_{\bar q \bar m}}
+\end{bmatrix}
+$$&lt;p&gt;使用增广矩阵，将多个端口及其响应同时添加到线性方程中，同时进行拟合。&lt;/p&gt;
+&lt;h3 id="实数替代复数"&gt;实数替代复数
+&lt;/h3&gt;&lt;p&gt;在原始基于部分分式的状态空间实现中，复数极点会导致 (A) 和 (C) 含有复数元素。而复数乘法的计算量约为实数的 4 倍，因此有必要通过&lt;strong&gt;变基&lt;/strong&gt;将整个系统转化为等价的 &lt;strong&gt;全实数状态空间模型&lt;/strong&gt;，从而显著降低计算复杂度。&lt;/p&gt;
+&lt;h4 id="极点结构特性"&gt;极点结构特性
+&lt;/h4&gt;&lt;p&gt;由拉普拉斯变换（以及系统实系数假设）可知，极点只能是：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;实极点&lt;/strong&gt;：$p \in \mathbb{R}$&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;复共轭极点对&lt;/strong&gt;：$p = a + jb,\quad p^* = a - jb$&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;因此状态空间中对应的每个复共轭对可以被替换为一个等价的 &lt;strong&gt;二维实子系统&lt;/strong&gt;。&lt;/p&gt;
+&lt;h4 id="复极点的实化变换"&gt;复极点的实化变换
+&lt;/h4&gt;&lt;p&gt;对一对共轭极点：&lt;/p&gt;
+$$
+p = a + jb,\qquad p^* = a - jb,
+$$&lt;p&gt;将其组成向量：&lt;/p&gt;
+$$
+\begin{bmatrix}p &amp; \ p^* \end{bmatrix}
+$$&lt;p&gt;并引入线性变换矩阵：&lt;/p&gt;
+$$
+T=
+\begin{bmatrix}
+1 &amp; 1 \\
+i &amp; -i
+\end{bmatrix},
+$$&lt;p&gt;则：&lt;/p&gt;
+$$
+T * \begin{bmatrix}p , p^* \end{bmatrix}^T=\
+\begin{bmatrix}
+p + p^* ,
+i(p - p^*)
+\end{bmatrix}^T\\
+=\
+\begin{bmatrix}
+2a ,2b
+\end{bmatrix}.
+$$&lt;p&gt;
+&lt;strong&gt;矩阵 (T) 将一对共轭极点映射为两个实数参数 (a) 与 (b)&lt;/strong&gt;（分别对应极点的实部与虚部）&lt;/p&gt;
+&lt;h4 id="在状态空间矩阵中的应用"&gt;在状态空间矩阵中的应用
+&lt;/h4&gt;&lt;p&gt;原始的 (A) 和 (C) 是由所有极点和残差组成的
+变基后：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;实极点对应的 1×1 实块保持不变&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;每对复共轭极点被替换为一个 2×2 的实 Jordan 模态块&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;新的实数状态矩阵形式为：&lt;/p&gt;
+$$
+\begin{align}
+&amp;A_{\text{real}} =
+\begin{bmatrix}
+A_{\text{real poles}} &amp; 0 \\
+0 &amp;
+\begin{matrix}
+a &amp; -b \\
+b &amp; a
+\end{matrix}
+\end{bmatrix}
+\end{align}
+$$&lt;p&gt;分块矩阵为：
+&lt;/p&gt;
+$$
+\begin{align}
+&amp;A_{\text{blk}}=\begin{bmatrix}a &amp; -b\\
+b &amp; a\end{bmatrix}\\
+&amp;B_{\text{blk}}=\begin{bmatrix}1,0\end{bmatrix}^T\\
+&amp;C_{\text{blk}}=\begin{bmatrix}2\Re(r) &amp; 2\Im(r)\end{bmatrix}\\
+\end{align}
+$$&lt;p&gt;证明分块的结果仍为极点-残差形式
+&lt;/p&gt;
+$$
+r = \alpha + j\beta\\
+C_{\text{blk}}(sI-A_{\text{blk}})^{-1}B_{\text{blk}}
+=\frac{2\alpha (s-a)+2b\beta}{(s-a)^2+b^2}
+=\frac{r}{s-p}+\frac{r^*}{s-p^*}.
+$$&lt;p&gt;对应的 (C) 也同步应用变换，使其完全实数化。&lt;/p&gt;
+&lt;p&gt;这样就将整个系统转换为 &lt;strong&gt;全实数状态空间模型&lt;/strong&gt;，避免了复数运算，提升数值效率与稳定性。&lt;/p&gt;
+&lt;p&gt;同时,应该对如下公式进行最小二乘计算，求得C后代入状态方程求解。(这里为了方便理解，没有将惩罚项加入)
+&lt;/p&gt;
+$$
+\begin{align}
+A &amp;= \
+\left[
+\begin{matrix}
+\Re{\Phi_0^{(i)}} &amp; 0 &amp; \dots &amp; -\Re {D_{H_{11}} \Phi_1^{(i)}} \\
+\Im{\Phi_0^{(i)}} &amp; 0 &amp; \dots &amp; -\Im {D_{H_{11}} \Phi_1^{(i)}} \\
+\vdots &amp; &amp; &amp; \vdots \\
+0 &amp; \dots &amp; \Re{\Phi_0^{(i)}} &amp; -\Re{ D_{H_{\bar{q}*m}} \Phi_1^{(i)} } \\
+0 &amp; \dots &amp; \Im{\Phi_0^{(i)}} &amp; -\Im{ D*{H_{\bar{q}_m}} \Phi_1^{(i)} }
+\end{matrix}
+\right]
+\\
+x &amp;= [c_{H_{11}}^{(i)},...,c_{H_{qm}}^{(i)},c_w^{(i)}]^T\\
+b&amp;=[\Re V_{H_{11}},\Im V_{H_{11}},...,\Re V_{H_{qm}},\Im V_{H_{qm}}]
+\end{align}
+$$&lt;h3 id="qr分解"&gt;QR分解
+&lt;/h3&gt;&lt;p&gt;在 Vector Fitting（VF）中：迭代的目的&lt;strong&gt;目标不是求分子/分母全部系数，而是迭代更新极点&lt;/strong&gt;
+极点由分母决定，那为什么还需要让分子系数参与迭代呢？&lt;/p&gt;
+&lt;p&gt;因此，直接借用QR分解，将最小二乘矩阵分解为正交阵Q和上三角矩阵R
+&lt;/p&gt;
+$$
+\begin{align}
+\left[ \Phi_0^{(i)} ~~-D_{H_{qm}}\Phi_1^{(i)} \right]
+= \left[ Q_{qm}^1~~ Q_{qm}^2 \right]
+\begin{bmatrix}
+R_{qm}^{11} &amp; R_{qm}^{12} \\
+0 &amp; R_{qm}^{22}
+\end{bmatrix}
+\end{align}
+$$&lt;p&gt;因此整个系统就能被缩减为：&lt;/p&gt;
+$$
+\begin{align}
+R_{qm}^{22} c_w^{(i)}=
+(Q_{qm}^2)^T V_{H_{qm}}
+\end{align}
+$$&lt;p&gt;直到迭代完成，再求一次完整的最小二乘，即可获取所有端口的分子系数，最后再代入状态方程求得频率响应。&lt;/p&gt;
+&lt;h3 id="基正交化"&gt;基正交化
+&lt;/h3&gt;&lt;p&gt;普通 Vector Fitting 使用以下形式的逼近：&lt;/p&gt;
+$$
+H_k(s) = \sum_{k=1}^n \frac{r_k}{s - a_k} + d + s e.
+$$&lt;p&gt;其中 ${a_k}$ 是极点，${r_k}$ 是残差。
+这一部分分式基&lt;strong&gt;不是正交的&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;对于极点位置聚集、高频幅度差异很大的系统，列之间高度相关，出现&lt;strong&gt;病态矩阵&lt;/strong&gt;的情况；&lt;/li&gt;
+&lt;li&gt;正交性差 → QR/SVD 求解残差和极点敏感；&lt;/li&gt;
+&lt;li&gt;拟合高阶系统时残差求解不稳定；&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;当极点近似重合时，多个极点对应的基退化为一个基，导致极点的系数自由度极高且不收敛。&lt;/p&gt;
+&lt;p&gt;因此需要在设计基函数$\phi$的时候，需要先将基转化为正交基，避免在最小二乘时出现病态。&lt;/p&gt;
+&lt;h4 id="穆兹-拉格朗日正交基的构建"&gt;穆兹-拉格朗日正交基的构建
+&lt;/h4&gt;&lt;p&gt;实极点的情况：
+&lt;/p&gt;
+$$
+pole = -a_p
+$$$$
+\begin{align}
+\phi_p(s)&amp;=\gamma_p
+\left( \prod_{j=1}^{p-1} \frac{s-a_j^*}{s+a_j} \right)
+\frac{1}{s+a_p}
+\end{align}
+$$&lt;p&gt;复共轭的情况：
+&lt;/p&gt;
+$$
+\begin{align}
+pole_1 &amp;= -a_p \\
+pole_2 &amp;= -a_{p+1}= -a_p^*
+\end{align}
+$$$$
+\begin{align}
+\phi_p(s)&amp;=\gamma_p
+\left( \prod_{j=1}^{p-1} \frac{s-a_j^*}{s+a_j} \right)
+\frac{s-x}{(s+a_p)(s+a_{p+1})}\\
+\phi_{p+1}(s)&amp;=\gamma_{p+1}
+\left( \prod_{j=1}^{p-1} \frac{s-a_j^*}{s+a_j} \right)
+\frac{s-y}{(s+a_p)(s+a_{p+1})}
+\end{align}
+$$&lt;p&gt;其中
+&lt;/p&gt;
+$$
+\begin{align}
+x &amp;= \sqrt{a_p a_{p+1}} = |a_p|\\
+y &amp;= -\sqrt{a_p a_{p+1}} = -|a_p|\\
+\gamma_p &amp;= \sqrt{a_p + a_{p+1}} = \sqrt{2 \Re(a_p)}\\
+\gamma_{p+1} &amp;= \sqrt{a_p + a_{p+1}} = \sqrt{2 \Re(a_p)}
+\end{align}
+$$&lt;p&gt;修改基为正交基后，最小二乘部分不需要任何改动，但是，需要对状态方程进行修改。&lt;/p&gt;
+&lt;h4 id="abcd矩阵初步构建"&gt;ABCD矩阵初步构建
+&lt;/h4&gt;$$
+\begin{align}
+A_{P\times P} &amp;=
+\begin{bmatrix}
+-a_1 &amp; 0 &amp; 0 &amp; \cdots &amp; 0 \\
+2\Re(-a_1) &amp; -a_2 &amp; 0 &amp; \cdots &amp; 0 \\
+2\Re(-a_1) &amp; 2\Re(-a_2) &amp; -a_3 &amp; \cdots &amp; 0 \\
+\vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+2\Re(-a_1) &amp; 2\Re(-a_2) &amp; 2\Re(-a_3) &amp; \cdots &amp; -a_P
+\end{bmatrix}\\
+\
+B_{1\times P} &amp;=
+\begin{bmatrix}
+1 &amp; 1 &amp; \cdots &amp; 1
+\end{bmatrix}\\
+\
+C_{P\times 1} &amp;=
+\begin{bmatrix}
+\tilde{c}_1 \sqrt{2\Re(a_1)} \\
+\tilde{c}_2 \sqrt{2\Re(a_2)} \\
+\vdots \\
+\tilde{c}_P \sqrt{2\Re(a_P)}
+\end{bmatrix}^{T}\\
+\
+D_{1\times 1} &amp;= \tilde{c}_0
+\end{align}
+$$&lt;h4 id="实极点"&gt;实极点
+&lt;/h4&gt;&lt;p&gt;如果 pole 为 &lt;strong&gt;real：&lt;/strong&gt;&lt;/p&gt;
+$$
+a_p \in \mathbb{R}
+$$&lt;p&gt;则对应：&lt;/p&gt;
+&lt;h5 id="a-block"&gt;A Block
+&lt;/h5&gt;$$
+A_p = [-a_p]
+$$&lt;h5 id="b-block"&gt;B Block
+&lt;/h5&gt;&lt;p&gt;所有 block 的 B 均为 1：&lt;/p&gt;
+$$
+B_p = 1
+$$&lt;h5 id="c-block"&gt;C Block
+&lt;/h5&gt;$$
+C_p = \tilde{c}_p \sqrt{2 \Re(a_p)}
+$$&lt;h4 id="复共轭极点"&gt;复共轭极点
+&lt;/h4&gt;&lt;p&gt;若极点为复共轭极点&lt;/p&gt;
+&lt;p&gt;则需要把复基变成二阶实系统，将对应的块插入原矩阵中：&lt;/p&gt;
+&lt;h5 id="a-block-1"&gt;A Block
+&lt;/h5&gt;$$
+A_p=
+\begin{pmatrix}
+\Re(-a_p) &amp; \Re(-a_p)-|a_p| \\
+\Re(-a_p)+|a_p| &amp; \Re(-a_p)
+\end{pmatrix}
+$$&lt;h5 id="b-block-1"&gt;B Block
+&lt;/h5&gt;$$
+B_p=\begin{pmatrix}1 \\ 1\end{pmatrix}
+$$&lt;h5 id="c-block-1"&gt;C Block
+&lt;/h5&gt;$$
+C_p=\tilde{c}_p
+\begin{pmatrix}
+\sqrt{\Re(a_p)} \\ \sqrt{\Re(a_p)}
+\end{pmatrix}
+$$&lt;h2 id="总结"&gt;总结
+&lt;/h2&gt;&lt;h3 id="基变换将问题转换到更容易解决的空间"&gt;基变换：将问题转换到更容易解决的空间
+&lt;/h3&gt;&lt;p&gt;很多问题看似困难，是因为它们被放置在了&lt;strong&gt;错误的基底&lt;/strong&gt;中。&lt;/p&gt;
+&lt;p&gt;基变换的核心哲学：&lt;/p&gt;
+&lt;p&gt;不要硬解当前空间中的问题，把它转换到一个更适合求解、结构更简单的空间中。&lt;/p&gt;
+&lt;p&gt;在数学、物理、信号处理、机器学习中随处可见：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;傅里叶变换：时频域转换&lt;/li&gt;
+&lt;li&gt;小波变换：把局部特征表达得更清晰&lt;/li&gt;
+&lt;li&gt;主成分分析（PCA）：找到数据能量最大的方向&lt;/li&gt;
+&lt;li&gt;实数化复数模型：减少计算与复杂度&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="正交化让信息不互相干扰"&gt;正交化：让信息不互相干扰
+&lt;/h3&gt;&lt;p&gt;许多算法性能差，不是因为模型不行，而是因为不同方向的信息相互污染、互相耦合，导致计算不稳定。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;正交化的核心哲学是：&lt;/p&gt;
+&lt;p&gt;让每个分量尽可能独立，让误差不会在不同维度之间传递。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;你可以在各个领域看到它：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Gram–Schmidt与QR 分解：分解为正交矩阵和上三角矩阵；计算最小二乘&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;神经网络训练中的 batch norm&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;数值分析中正交基改善条件数&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;正交化的意义不仅是数学操作，而是一个极其通用的原则：&lt;/p&gt;
+&lt;p&gt;消除耦合，让系统稳定，从而更容易优化。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="控制论视角任何复杂系统都可以拆成状态输入输出"&gt;控制论视角：任何复杂系统都可以拆成状态、输入、输出
+&lt;/h3&gt;&lt;p&gt;控制论提供了一个普适的框架：&lt;/p&gt;
+$$
+\dot{x}(t) = Ax+Bu(t)\\
+y(t) = Cx+Du(t)
+$$&lt;p&gt;这是一个思想结构，不仅仅是方程。&lt;/p&gt;
+&lt;p&gt;它告诉我们：&lt;/p&gt;
+&lt;p&gt;任何复杂系统都可以分成 内部状态（A） 与 外部作用（B）&lt;/p&gt;
+&lt;p&gt;系统必须可控、可观，否则你无法理解或操纵它&lt;/p&gt;
+&lt;p&gt;信息的流动结构比具体形式更重要&lt;/p&gt;
+&lt;p&gt;无论是：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;信号建模&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;强化学习&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;经济系统&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;生物系统&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;软件架构&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;深度网络&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;都可以抽象为一个控制系统。&lt;/p&gt;
+&lt;p&gt;拉普拉斯变换可以将时域信号转换到频域，通过系统极点，展示系统的本征结构&lt;/p&gt;
+$$
+G(s) = C(SI-A)^{-1}B - D
+$$&lt;p&gt;A的特征值就是极点&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;稳定性、可控性、可观性不是控制论专属，而是普适的建模原则。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="迭代本质在能走的方向上不断逼近真相"&gt;迭代本质：在“能走的方向上”不断逼近真相
+&lt;/h3&gt;&lt;p&gt;几乎所有的非线性问题，都无法一步到位。
+迭代方法的哲学本质是：&lt;/p&gt;
+&lt;p&gt;把大问题拆成可解的小问题，将非线性问题转化为多个局部小规模的线性问题，通过不断更新来逼近最终解。&lt;/p&gt;
+&lt;p&gt;本质是&lt;strong&gt;数据降维&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;迭代思想贯穿全科学：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Newton iteration&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Gradient descent&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Expectation–Maximization（EM）&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;SK iteration&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Krylov 子空间迭代&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;迭代的底层思想是：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;设计一个收敛的动力系统，把求解问题变成模拟系统动态演化。&lt;/p&gt;
+&lt;p&gt;这是对“求解”思想的一次重新理解：
+不是一锤定音，而是构造一个朝向真相的路径。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;strong&gt;参考文献&lt;/strong&gt;
+[1] arXiv:1908.08977v1 [physics.comp-ph]
+&lt;a class="link" href="https://doi.org/10.48550/arXiv.1908.08977" target="_blank" rel="noopener"
+&gt;https://doi.org/10.48550/arXiv.1908.08977&lt;/a&gt;
+[2] D. Deschrijver, B. Haegeman and T. Dhaene, &amp;ldquo;Orthonormal Vector Fitting: A Robust Macromodeling Tool for Rational Approximation of Frequency Domain Responses,&amp;rdquo; in IEEE Transactions on Advanced Packaging, vol. 30, no. 2, pp. 216-225, May 2007, doi: 10.1109/TADVP.2006.879429. keywords: {Robustness;Frequency domain analysis;Equations;Circuit simulation;Numerical stability;System identification;Design optimization;Electronics packaging;Linear approximation;Vectors;Macromodeling;rational functions;system identification},
+[3] Stefano Grivet-Talocia; Bjorn Gustavsen, &amp;ldquo;Advanced Vector Fitting for Multiport Problems,&amp;rdquo; in Passive Macromodeling: Theory and Applications , Wiley, 2016, pp.307-364, doi: 10.1002/9781119140931.ch8.
+keywords: {Vectors;Standards;Lead;Ions;Fitting;State-space methods;Sparse matrices},
+[4]&lt;/p&gt;</description></item><item><title>Hello World</title><link>https://m4ygem1ni.github.io/p/hello-world/</link><pubDate>Sun, 06 Mar 2022 00:00:00 +0000</pubDate><guid>https://m4ygem1ni.github.io/p/hello-world/</guid><description>&lt;img src="https://m4ygem1ni.github.io/p/hello-world/cover.jpg" alt="Featured image of post Hello World" /&gt;&lt;p&gt;Welcome to Hugo theme Stack. This is your first post. Edit or delete it, then start writing!&lt;/p&gt;
+&lt;p&gt;For more information about this theme, check the documentation: &lt;a class="link" href="https://stack.jimmycai.com/" target="_blank" rel="noopener"
+&gt;https://stack.jimmycai.com/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Want a site like this? Check out &lt;a class="link" href="https://github.com/CaiJimmy/hugo-theme-stack-starter" target="_blank" rel="noopener"
+&gt;hugo-theme-stack-stater&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Photo by &lt;a class="link" href="https://unsplash.com/@pawel_czerwinski" target="_blank" rel="noopener"
+&gt;Pawel Czerwinski&lt;/a&gt; on &lt;a class="link" href="https://unsplash.com/" target="_blank" rel="noopener"
+&gt;Unsplash&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;</description></item><item><title>Markdown Syntax Guide</title><link>https://m4ygem1ni.github.io/p/markdown-syntax-guide/</link><pubDate>Thu, 07 Sep 2023 00:00:00 +0000</pubDate><guid>https://m4ygem1ni.github.io/p/markdown-syntax-guide/</guid><description>&lt;p&gt;This article offers a sample of basic Markdown syntax that can be used in Hugo content files, also it shows whether basic HTML elements are decorated with CSS in a Hugo theme.&lt;/p&gt;
+&lt;h2 id="headings"&gt;Headings
+&lt;/h2&gt;&lt;p&gt;The following HTML &lt;code&gt;&amp;lt;h1&amp;gt;&lt;/code&gt;—&lt;code&gt;&amp;lt;h6&amp;gt;&lt;/code&gt; elements represent six levels of section headings. &lt;code&gt;&amp;lt;h1&amp;gt;&lt;/code&gt; is the highest section level while &lt;code&gt;&amp;lt;h6&amp;gt;&lt;/code&gt; is the lowest.&lt;/p&gt;
+&lt;h1 id="h1"&gt;H1
+&lt;/h1&gt;&lt;h2 id="h2"&gt;H2
+&lt;/h2&gt;&lt;h3 id="h3"&gt;H3
+&lt;/h3&gt;&lt;h4 id="h4"&gt;H4
+&lt;/h4&gt;&lt;h5 id="h5"&gt;H5
+&lt;/h5&gt;&lt;h6 id="h6"&gt;H6
+&lt;/h6&gt;&lt;h2 id="paragraph"&gt;Paragraph
+&lt;/h2&gt;&lt;p&gt;Xerum, quo qui aut unt expliquam qui dolut labo. Aque venitatiusda cum, voluptionse latur sitiae dolessi aut parist aut dollo enim qui voluptate ma dolestendit peritin re plis aut quas inctum laceat est volestemque commosa as cus endigna tectur, offic to cor sequas etum rerum idem sintibus eiur? Quianimin porecus evelectur, cum que nis nust voloribus ratem aut omnimi, sitatur? Quiatem. Nam, omnis sum am facea corem alique molestrunt et eos evelece arcillit ut aut eos eos nus, sin conecerem erum fuga. Ri oditatquam, ad quibus unda veliamenimin cusam et facea ipsamus es exerum sitate dolores editium rerore eost, temped molorro ratiae volorro te reribus dolorer sperchicium faceata tiustia prat.&lt;/p&gt;
+&lt;p&gt;Itatur? Quiatae cullecum rem ent aut odis in re eossequodi nonsequ idebis ne sapicia is sinveli squiatum, core et que aut hariosam ex eat.&lt;/p&gt;
+&lt;h2 id="blockquotes"&gt;Blockquotes
+&lt;/h2&gt;&lt;p&gt;The blockquote element represents content that is quoted from another source, optionally with a citation which must be within a &lt;code&gt;footer&lt;/code&gt; or &lt;code&gt;cite&lt;/code&gt; element, and optionally with in-line changes such as annotations and abbreviations.&lt;/p&gt;
+&lt;h3 id="blockquote-without-attribution"&gt;Blockquote without attribution
+&lt;/h3&gt;&lt;blockquote&gt;
+&lt;p&gt;Tiam, ad mint andaepu dandae nostion secatur sequo quae.
+&lt;strong&gt;Note&lt;/strong&gt; that you can use &lt;em&gt;Markdown syntax&lt;/em&gt; within a blockquote.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="blockquote-with-attribution"&gt;Blockquote with attribution
+&lt;/h3&gt;&lt;blockquote&gt;
+&lt;p&gt;Don&amp;rsquo;t communicate by sharing memory, share memory by communicating.&lt;br&gt;
+— &lt;cite&gt;Rob Pike&lt;sup id="fnref:1"&gt;&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref"&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/cite&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="tables"&gt;Tables
+&lt;/h2&gt;&lt;p&gt;Tables aren&amp;rsquo;t part of the core Markdown spec, but Hugo supports supports them out-of-the-box.&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Name&lt;/th&gt;
+&lt;th&gt;Age&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;Bob&lt;/td&gt;
+&lt;td&gt;27&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Alice&lt;/td&gt;
+&lt;td&gt;23&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="inline-markdown-within-tables"&gt;Inline Markdown within tables
+&lt;/h3&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Italics&lt;/th&gt;
+&lt;th&gt;Bold&lt;/th&gt;
+&lt;th&gt;Code&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;em&gt;italics&lt;/em&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;bold&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;code&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;A&lt;/th&gt;
+&lt;th&gt;B&lt;/th&gt;
+&lt;th&gt;C&lt;/th&gt;
+&lt;th&gt;D&lt;/th&gt;
+&lt;th&gt;E&lt;/th&gt;
+&lt;th&gt;F&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit.&lt;/td&gt;
+&lt;td&gt;Phasellus ultricies, sapien non euismod aliquam, dui ligula tincidunt odio, at accumsan nulla sapien eget ex.&lt;/td&gt;
+&lt;td&gt;Proin eleifend dictum ipsum, non euismod ipsum pulvinar et. Vivamus sollicitudin, quam in pulvinar aliquam, metus elit pretium purus&lt;/td&gt;
+&lt;td&gt;Proin sit amet velit nec enim imperdiet vehicula.&lt;/td&gt;
+&lt;td&gt;Ut bibendum vestibulum quam, eu egestas turpis gravida nec&lt;/td&gt;
+&lt;td&gt;Sed scelerisque nec turpis vel viverra. Vivamus vitae pretium sapien&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id="code-blocks"&gt;Code Blocks
+&lt;/h2&gt;&lt;h3 id="code-block-with-backticks"&gt;Code block with backticks
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-html" data-lang="html"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="cp"&gt;&amp;lt;!doctype html&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;html&lt;/span&gt; &lt;span class="na"&gt;lang&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;en&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;head&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;meta&lt;/span&gt; &lt;span class="na"&gt;charset&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;utf-8&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;title&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;Example HTML5 Document&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;title&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;head&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;body&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;p&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;Test&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;p&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;body&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;html&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="code-block-indented-with-four-spaces"&gt;Code block indented with four spaces
+&lt;/h3&gt;&lt;pre&gt;&lt;code&gt;&amp;lt;!doctype html&amp;gt;
+&amp;lt;html lang=&amp;quot;en&amp;quot;&amp;gt;
+&amp;lt;head&amp;gt;
+&amp;lt;meta charset=&amp;quot;utf-8&amp;quot;&amp;gt;
+&amp;lt;title&amp;gt;Example HTML5 Document&amp;lt;/title&amp;gt;
+&amp;lt;/head&amp;gt;
+&amp;lt;body&amp;gt;
+&amp;lt;p&amp;gt;Test&amp;lt;/p&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id="diff-code-block"&gt;Diff code block
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-diff" data-lang="diff"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;[dependencies.bevy]
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;git = &amp;#34;https://github.com/bevyengine/bevy&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;rev = &amp;#34;11f52b8c72fc3a568e8bb4a4cd1f3eb025ac2e13&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="gd"&gt;- features = [&amp;#34;dynamic&amp;#34;]
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="gd"&gt;&lt;/span&gt;&lt;span class="gi"&gt;+ features = [&amp;#34;jpeg&amp;#34;, &amp;#34;dynamic&amp;#34;]
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="one-line-code-block"&gt;One line code block
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-html" data-lang="html"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;p&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;A paragraph&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;p&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="list-types"&gt;List Types
+&lt;/h2&gt;&lt;h3 id="ordered-list"&gt;Ordered List
+&lt;/h3&gt;&lt;ol&gt;
+&lt;li&gt;First item&lt;/li&gt;
+&lt;li&gt;Second item&lt;/li&gt;
+&lt;li&gt;Third item&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id="unordered-list"&gt;Unordered List
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;List item&lt;/li&gt;
+&lt;li&gt;Another item&lt;/li&gt;
+&lt;li&gt;And another item&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="nested-list"&gt;Nested list
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Fruit
+&lt;ul&gt;
+&lt;li&gt;Apple&lt;/li&gt;
+&lt;li&gt;Orange&lt;/li&gt;
+&lt;li&gt;Banana&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Dairy
+&lt;ul&gt;
+&lt;li&gt;Milk&lt;/li&gt;
+&lt;li&gt;Cheese&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="other-elements--abbr-sub-sup-kbd-mark"&gt;Other Elements — abbr, sub, sup, kbd, mark
+&lt;/h2&gt;&lt;p&gt;&lt;abbr title="Graphics Interchange Format"&gt;GIF&lt;/abbr&gt; is a bitmap image format.&lt;/p&gt;
+&lt;p&gt;H&lt;sub&gt;2&lt;/sub&gt;O&lt;/p&gt;
+&lt;p&gt;X&lt;sup&gt;n&lt;/sup&gt; + Y&lt;sup&gt;n&lt;/sup&gt; = Z&lt;sup&gt;n&lt;/sup&gt;&lt;/p&gt;
+&lt;p&gt;Press &lt;kbd&gt;CTRL&lt;/kbd&gt; + &lt;kbd&gt;ALT&lt;/kbd&gt; + &lt;kbd&gt;Delete&lt;/kbd&gt; to end the session.&lt;/p&gt;
+&lt;p&gt;Most &lt;mark&gt;salamanders&lt;/mark&gt; are nocturnal, and hunt for insects, worms, and other small creatures.&lt;/p&gt;
+&lt;div class="footnotes" role="doc-endnotes"&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id="fn:1"&gt;
+&lt;p&gt;The above quote is excerpted from Rob Pike&amp;rsquo;s &lt;a class="link" href="https://www.youtube.com/watch?v=PAAkCSZUG1c" target="_blank" rel="noopener"
+&gt;talk&lt;/a&gt; during Gopherfest, November 18, 2015.&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink"&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;</description></item><item><title>Image gallery</title><link>https://m4ygem1ni.github.io/p/image-gallery/</link><pubDate>Sat, 26 Aug 2023 00:00:00 +0000</pubDate><guid>https://m4ygem1ni.github.io/p/image-gallery/</guid><description>&lt;img src="https://m4ygem1ni.github.io/p/image-gallery/2.jpg" alt="Featured image of post Image gallery" /&gt;&lt;p&gt;Hugo theme Stack supports the creation of interactive image galleries using Markdown. It&amp;rsquo;s powered by &lt;a class="link" href="https://photoswipe.com/" target="_blank" rel="noopener"
+&gt;PhotoSwipe&lt;/a&gt; and its syntax was inspired by &lt;a class="link" href="https://typlog.com/" target="_blank" rel="noopener"
+&gt;Typlog&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;To use this feature, the image must be in the same directory as the Markdown file, as it uses Hugo&amp;rsquo;s page bundle feature to read the dimensions of the image. &lt;strong&gt;External images are not supported.&lt;/strong&gt;&lt;/p&gt;
+&lt;h2 id="syntax"&gt;Syntax
+&lt;/h2&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-markdown" data-lang="markdown"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;![&lt;span class="nt"&gt;Image 1&lt;/span&gt;](&lt;span class="na"&gt;1.jpg&lt;/span&gt;) ![&lt;span class="nt"&gt;Image 2&lt;/span&gt;](&lt;span class="na"&gt;2.jpg&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="result"&gt;Result
+&lt;/h2&gt;&lt;p&gt;&lt;img src="https://m4ygem1ni.github.io/p/image-gallery/1.jpg"
+width="2000"
+height="1400"
+srcset="https://m4ygem1ni.github.io/p/image-gallery/1_hu_811b671457ffff1f.jpg 480w, https://m4ygem1ni.github.io/p/image-gallery/1_hu_c74af69dd7c1dcda.jpg 1024w"
+loading="lazy"
+alt="Image 1"
+class="gallery-image"
+data-flex-grow="142"
+data-flex-basis="342px"
+&gt; &lt;img src="https://m4ygem1ni.github.io/p/image-gallery/2.jpg"
+width="1500"
+height="2250"
+srcset="https://m4ygem1ni.github.io/p/image-gallery/2_hu_42f6436cb1637265.jpg 480w, https://m4ygem1ni.github.io/p/image-gallery/2_hu_27862a49608da0d9.jpg 1024w"
+loading="lazy"
+alt="Image 2"
+class="gallery-image"
+data-flex-grow="66"
+data-flex-basis="160px"
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Photo by &lt;a class="link" href="https://unsplash.com/@mymind" target="_blank" rel="noopener"
+&gt;mymind&lt;/a&gt; and &lt;a class="link" href="https://unsplash.com/@lukechesser" target="_blank" rel="noopener"
+&gt;Luke Chesser&lt;/a&gt; on &lt;a class="link" href="https://unsplash.com/" target="_blank" rel="noopener"
+&gt;Unsplash&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;</description></item><item><title>Shortcodes</title><link>https://m4ygem1ni.github.io/p/shortcodes/</link><pubDate>Fri, 25 Aug 2023 00:00:00 +0000</pubDate><guid>https://m4ygem1ni.github.io/p/shortcodes/</guid><description>&lt;img src="https://m4ygem1ni.github.io/p/shortcodes/cover.jpg" alt="Featured image of post Shortcodes" /&gt;&lt;p&gt;For more details, check out the &lt;a class="link" href="https://stack.jimmycai.com/writing/shortcodes" target="_blank" rel="noopener"
+&gt;documentation&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id="bilibili-video"&gt;Bilibili video
+&lt;/h2&gt;
+&lt;div class="video-wrapper"&gt;
+&lt;iframe src="https://player.bilibili.com/player.html?as_wide=1&amp;amp;high_quality=1&amp;amp;page=1&amp;bvid=BV1d4411N7zD"
+scrolling="no"
+frameborder="no"
+framespacing="0"
+allowfullscreen="true"
+&gt;
+&lt;/iframe&gt;
+&lt;/div&gt;
+&lt;h2 id="tencent-video"&gt;Tencent video
+&lt;/h2&gt;
+&lt;div class="video-wrapper"&gt;
+&lt;iframe src="https://v.qq.com/txp/iframe/player.html?vid=g0014r3khdw&amp;auto=0"
+scrolling="no"
+frameborder="no"
+framespacing="0"
+allowfullscreen="true"
+&gt;
+&lt;/iframe&gt;
+&lt;/div&gt;
+&lt;h2 id="youtube-video"&gt;YouTube video
+&lt;/h2&gt;&lt;div class="video-wrapper"&gt;
+&lt;iframe loading="lazy"
+src="https://www.youtube.com/embed/0qwALOOvUik"
+allowfullscreen
+title="YouTube Video"
+&gt;
+&lt;/iframe&gt;
+&lt;/div&gt;
+&lt;h2 id="generic-video-file"&gt;Generic video file
+&lt;/h2&gt;&lt;div class="video-wrapper"&gt;
+&lt;video
+controls
+src="https://www.w3schools.com/tags/movie.mp4"
+&gt;
+&lt;p&gt;
+Your browser doesn't support HTML5 video. Here is a
+&lt;a href="https://www.w3schools.com/tags/movie.mp4"&gt;link to the video&lt;/a&gt; instead.
+&lt;/p&gt;
+&lt;/video&gt;
+&lt;/div&gt;
+&lt;h2 id="gist"&gt;Gist
+&lt;/h2&gt;&lt;script src="https://gist.github.com/CaiJimmy/e2751a943de10b2a5b3a8a6c2120cb86.js"&gt;&lt;/script&gt;
+&lt;h2 id="gitlab"&gt;GitLab
+&lt;/h2&gt;&lt;script
+type="application/javascript"
+src="https://gitlab.com/-/snippets/2589724.js"
+&gt;&lt;/script&gt;
+&lt;h2 id="quote"&gt;Quote
+&lt;/h2&gt;&lt;blockquote&gt;
+&lt;p&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.&lt;/p&gt;&lt;span class="cite"&gt;&lt;span&gt;― &lt;/span&gt;&lt;span&gt;A famous person, &lt;/span&gt;&lt;a href="https://en.wikipedia.org/wiki/Book"&gt;&lt;cite&gt;The book they wrote&lt;/cite&gt;&lt;/a&gt;&lt;/span&gt;&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Photo by &lt;a class="link" href="https://unsplash.com/@codioful" target="_blank" rel="noopener"
+&gt;Codioful&lt;/a&gt; on &lt;a class="link" href="https://unsplash.com/photos/WDSN62Qdxuk" target="_blank" rel="noopener"
+&gt;Unsplash&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;</description></item><item><title>Math Typesetting</title><link>https://m4ygem1ni.github.io/p/math-typesetting/</link><pubDate>Thu, 24 Aug 2023 00:00:00 +0000</pubDate><guid>https://m4ygem1ni.github.io/p/math-typesetting/</guid><description>&lt;p&gt;Stack has built-in support for math typesetting using &lt;a class="link" href="https://katex.org/" target="_blank" rel="noopener"
+&gt;KaTeX&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;It&amp;rsquo;s not enabled by default side-wide,&lt;/strong&gt; but you can enable it for individual posts by adding &lt;code&gt;math: true&lt;/code&gt; to the front matter. Or you can enable it side-wide by adding &lt;code&gt;math = true&lt;/code&gt; to the &lt;code&gt;params.article&lt;/code&gt; section in &lt;code&gt;config.toml&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id="inline-math"&gt;Inline math
+&lt;/h2&gt;&lt;p&gt;This is an inline mathematical expression: $\varphi = \dfrac{1+\sqrt5}{2}= 1.6180339887…$&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-markdown" data-lang="markdown"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;$\varphi = \dfrac{1+\sqrt5}{2}= 1.6180339887…$
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id="block-math"&gt;Block math
+&lt;/h2&gt;$$
+\varphi = 1+\frac{1} {1+\frac{1} {1+\frac{1} {1+\cdots} } }
+$$&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-markdown" data-lang="markdown"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;$$
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; \varphi = 1+\frac{1} {1+\frac{1} {1+\frac{1} {1+\cdots} } }
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;$$
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;$$
+f(x) = \int_{-\infty}^\infty\hat f(\xi)\,e^{2 \pi i \xi x}\,d\xi
+$$&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-markdown" data-lang="markdown"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;$$
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; f(x) = \int_{-\infty}^\infty\hat f(\xi)\,e^{2 \pi i \xi x}\,d\xi
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;$$
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;</description></item><item><title>Archives</title><link>https://m4ygem1ni.github.io/archives/</link><pubDate>Sun, 06 Mar 2022 00:00:00 +0000</pubDate><guid>https://m4ygem1ni.github.io/archives/</guid><description/></item><item><title>Links</title><link>https://m4ygem1ni.github.io/links/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://m4ygem1ni.github.io/links/</guid><description>&lt;p&gt;To use this feature, add &lt;code&gt;links&lt;/code&gt; section to frontmatter.&lt;/p&gt;
+&lt;p&gt;This page&amp;rsquo;s frontmatter:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;span class="lnt"&gt;8
+&lt;/span&gt;&lt;span class="lnt"&gt;9
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;links&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;- &lt;span class="nt"&gt;title&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;GitHub&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;description&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;GitHub is the world&amp;#39;s largest software development platform.&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;website&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;https://github.com&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;image&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;- &lt;span class="nt"&gt;title&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;TypeScript&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;description&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;TypeScript is a typed superset of JavaScript that compiles to plain JavaScript.&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;website&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;https://www.typescriptlang.org&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;image&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;ts-logo-128.jpg&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;image&lt;/code&gt; field accepts both local and external images.&lt;/p&gt;</description></item><item><title>Search</title><link>https://m4ygem1ni.github.io/search/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://m4ygem1ni.github.io/search/</guid><description/></item></channel></rss>
