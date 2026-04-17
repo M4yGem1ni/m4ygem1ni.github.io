@@ -2,7 +2,7 @@
 title: AutomaticDifferentiation
 description: Summary Of AutomaticDifferentiation
 slug: vector-fitting
-date: 2026-4-18 00:48:00+0000
+date: 2026-04-18 00:48:00+0800
 image: cover.jpg
 categories:
     - algorithm
