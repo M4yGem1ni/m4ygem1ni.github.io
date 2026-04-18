@@ -3,7 +3,7 @@ title: AutomaticDifferentiation
 description: Summary Of AutomaticDifferentiation
 slug: AutomaticDifferentiation
 date: 2026-04-18 00:48:00+0800
-image: cover.jpg
+image: autumn_bridge.png
 categories:
     - algorithm
 tags:
