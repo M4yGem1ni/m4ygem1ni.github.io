@@ -1,0 +1,360 @@
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="Summary Of AutomaticDifferentiation"><title>AutomaticDifferentiation</title><link rel=canonical href=https://m4ygem1ni.github.io/p/automaticdifferentiation/><link rel=stylesheet href=/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css><meta property='og:title' content="AutomaticDifferentiation"><meta property='og:description' content="Summary Of AutomaticDifferentiation"><meta property='og:url' content='https://m4ygem1ni.github.io/p/automaticdifferentiation/'><meta property='og:site_name' content='This is MayGemini.'><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='algorithm'><meta property='article:published_time' content='2026-04-18T00:48:00+08:00'><meta property='article:modified_time' content='2026-04-18T00:48:00+08:00'><meta property='og:image' content='https://m4ygem1ni.github.io/p/automaticdifferentiation/pexels-maciej-cisowski-174297128-34623597.jpg'><meta name=twitter:title content="AutomaticDifferentiation"><meta name=twitter:description content="Summary Of AutomaticDifferentiation"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content='https://m4ygem1ni.github.io/p/automaticdifferentiation/pexels-maciej-cisowski-174297128-34623597.jpg'><link rel="shortcut icon" href=/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hu_38b126ce4825c17.jpg width=300 height=300 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🍥</span></figure><div class=site-meta><h1 class=site-name><a href=/>This is MayGemini.</a></h1><h2 class=site-description>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</h2></div></header><ol class=menu-social><li><a href=https://github.com/M4yGem1ni target=_blank title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li><li><a href=https://twitter.com target=_blank title=Twitter rel=me><svg class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M22 4.01c-1 .49-1.98.689-3 .99-1.121-1.265-2.783-1.335-4.38-.737S11.977 6.323 12 8v1c-3.245.083-6.135-1.395-8-4 0 0-4.182 7.433 4 11-1.872 1.247-3.739 2.088-6 2 3.308 1.803 6.913 2.423 10.034 1.517 3.58-1.04 6.522-3.723 7.651-7.742a13.84 13.84.0 00.497-3.753C20.18 7.773 21.692 5.25 22 4.009z"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>Home</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>Archives</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>Search</span></a></li><li><a href=/links/><svg class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M10 14a3.5 3.5.0 005 0l4-4a3.5 3.5.0 00-5-5l-.5.5"/><path d="M14 10a3.5 3.5.0 00-5 0l-4 4a3.5 3.5.0 005 5l.5-.5"/></svg>
+<span>Links</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#开始>开始</a></li><li><a href=#无穷小量的数学定义>无穷小量的数学定义</a></li><li><a href=#定义最小量运算规则>定义最小量运算规则</a><ol><li><a href=#对偶数定义>对偶数定义</a></li><li><a href=#加减乘除运算规则>加减乘除运算规则</a></li><li><a href=#初等函数运算规则>初等函数运算规则</a></li></ol></li><li><a href=#前向自动微分>前向自动微分</a><ol><li><a href=#单变量全导>单变量全导</a></li><li><a href=#多变量偏导>多变量偏导</a></li><li><a href=#模板处理函数>模板处理函数</a></li></ol></li><li><a href=#后向自动微分>后向自动微分</a><ol><li><a href=#链式节点>链式节点</a></li><li><a href=#节点定义>节点定义</a></li><li><a href=#计算过程>计算过程</a></li></ol></li></ol></nav></div></section></aside><main class="main full-width"><article class="has-image main-article"><header class=article-header><div class=article-image><a href=/p/automaticdifferentiation/><img src=/p/automaticdifferentiation/pexels-maciej-cisowski-174297128-34623597_hu_7975757624297a9e.jpg srcset="/p/automaticdifferentiation/pexels-maciej-cisowski-174297128-34623597_hu_7975757624297a9e.jpg 800w, /p/automaticdifferentiation/pexels-maciej-cisowski-174297128-34623597_hu_92078e3b7dad6a0e.jpg 1600w" width=800 height=1200 loading=lazy alt="Featured image of post AutomaticDifferentiation"></a></div><div class=article-details><header class=article-category><a href=/categories/algorithm/ style=background-color:#6917ab;color:#fff>Algorithm Category</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/automaticdifferentiation/>AutomaticDifferentiation</a></h2><h3 class=article-subtitle>Summary Of AutomaticDifferentiation</h3></div><footer class=article-time><div><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2026-04-18T00:48:00+08:00>Apr 18, 2026</time></div><div><svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 5 分钟</time></div></footer></div></header><section class=article-content><p>每个学过高等数学的大学生都知道<strong>最小量</strong>这一名词，但很少思考最小量有多小。计算机学科专业的同学可能会想到使用浮点数来表示最小量，比如常见的使用 <code>1e-12</code> 作为最小量。但这引入了浮点数精度问题以及数学上的不严谨。</p><p>这篇博客的目标是实现一个<strong>自动微分器</strong>，通过表达式自动求导数，重新审视并定义<strong>最小量</strong>的概念。</p><blockquote><p>项目仓库：https://github.com/M4yGem1ni/AutomaticDifferentiation</p></blockquote><h2 id=开始>开始</h2><p>作为一个计算机科学与技术的学生，我相信你一定熟练掌握 <code>numpy</code> 这种科学计算库。</p><p>假如你现在有一个函数 $f(x) = e^{\sin(x)}$，你需要对其求导。我们小学二年级就学过导数的定义：</p>$$
+f'(x) = \frac{f(x + \varepsilon) - f(x)}{\varepsilon}
+$$<p>由于计算机学科的学生经常使用浮点数，于是首先想到的方法是定义一个阈值，比如 <code>1e-12</code> 作为最小量 $\varepsilon$，直接计算：</p>$$
+f'(x) \approx \frac{f(x + 1e^{-12}) - f(x)}{1e^{-12}}
+$$<p>当</p>$$
+\lvert N_1 - N_2 \rvert \le 1e^{-12}
+$$<p>时，认为 $N_1$ 与 $N_2$ 相等。</p><p>但是，只要你使用浮点数，就会面临精度问题。例如计算机计算 $10^{10} + 10^{-12} = 10^{10}$，导致求导公式的分子直接为零，导数恒为 0。</p><h2 id=无穷小量的数学定义>无穷小量的数学定义</h2><p>在数学上，无穷小量的定义是：</p><blockquote><p>$\forall \varepsilon > 0$，$\exists \delta > 0$，当 $0 &lt; \lvert x - x_0 \rvert &lt; \delta$ 时，恒有 $\lvert f(x) \rvert &lt; \varepsilon$。</p></blockquote><p>观察这个定义我们不难发现：<strong>没有办法使用一个确切的数值作为最小量</strong>。如果使用 <code>1e-12</code>，则依旧可以找到 <code>1e-15</code> 比 <code>1e-12</code> 更小，以此类推，无穷无尽。</p><p>因此，想要正确地表示最小量，我们只能使用一个<strong>未知的符号</strong>来表示，数学中使用 $\varepsilon$。</p><h2 id=定义最小量运算规则>定义最小量运算规则</h2><p>我们需要抛弃使用数值的方式定义最小量，为最小量定制一套运算规则，让它参与函数表达式计算。这里直接给出答案：</p>$$
+\varepsilon + \varepsilon = 2\varepsilon
+$$<p></p>$$
+\varepsilon \times \varepsilon = 0
+$$<p>由于无穷小量已经足够小了，所以只保留一阶无穷小量，丢弃所有的高阶无穷小量，同时保证一阶无穷小量参与计算。</p><h3 id=对偶数定义>对偶数定义</h3><p>在这个基础上，我们需要两个维度的信息来表示自变量 $x$，对 $x$ 的类型进行重定义：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=k>struct</span> <span class=nc>Dual</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>double</span> <span class=n>value</span><span class=p>;</span>  <span class=c1>// 数值部分
+</span></span></span><span class=line><span class=cl>    <span class=kt>double</span> <span class=n>deriv</span><span class=p>;</span>  <span class=c1>// 导数部分
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>Dual</span><span class=p>(</span><span class=kt>double</span> <span class=n>v</span> <span class=o>=</span> <span class=mf>0.0</span><span class=p>,</span> <span class=kt>double</span> <span class=n>d</span> <span class=o>=</span> <span class=mf>0.0</span><span class=p>)</span> <span class=o>:</span> <span class=n>value</span><span class=p>(</span><span class=n>v</span><span class=p>),</span> <span class=n>deriv</span><span class=p>(</span><span class=n>d</span><span class=p>)</span> <span class=p>{}</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><p>这种数据类型被称为<strong>对偶数</strong>（Dual Number），形式为 $a + b\varepsilon$。</p><h3 id=加减乘除运算规则>加减乘除运算规则</h3><p>根据上方给出的两条定义，我们重定义 <code>+</code>、<code>-</code>、<code>*</code>、<code>/</code> 这四种基础运算法则：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=kr>inline</span> <span class=n>Dual</span> <span class=k>operator</span><span class=o>+</span><span class=p>(</span><span class=k>const</span> <span class=n>Dual</span><span class=o>&amp;</span> <span class=n>a</span><span class=p>,</span> <span class=k>const</span> <span class=n>Dual</span><span class=o>&amp;</span> <span class=n>b</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=nf>Dual</span><span class=p>(</span><span class=n>a</span><span class=p>.</span><span class=n>value</span> <span class=o>+</span> <span class=n>b</span><span class=p>.</span><span class=n>value</span><span class=p>,</span> <span class=n>a</span><span class=p>.</span><span class=n>deriv</span> <span class=o>+</span> <span class=n>b</span><span class=p>.</span><span class=n>deriv</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kr>inline</span> <span class=n>Dual</span> <span class=k>operator</span><span class=o>-</span><span class=p>(</span><span class=k>const</span> <span class=n>Dual</span><span class=o>&amp;</span> <span class=n>a</span><span class=p>,</span> <span class=k>const</span> <span class=n>Dual</span><span class=o>&amp;</span> <span class=n>b</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=nf>Dual</span><span class=p>(</span><span class=n>a</span><span class=p>.</span><span class=n>value</span> <span class=o>-</span> <span class=n>b</span><span class=p>.</span><span class=n>value</span><span class=p>,</span> <span class=n>a</span><span class=p>.</span><span class=n>deriv</span> <span class=o>-</span> <span class=n>b</span><span class=p>.</span><span class=n>deriv</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kr>inline</span> <span class=n>Dual</span> <span class=k>operator</span><span class=o>*</span><span class=p>(</span><span class=k>const</span> <span class=n>Dual</span><span class=o>&amp;</span> <span class=n>a</span><span class=p>,</span> <span class=k>const</span> <span class=n>Dual</span><span class=o>&amp;</span> <span class=n>b</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=nf>Dual</span><span class=p>(</span><span class=n>a</span><span class=p>.</span><span class=n>value</span> <span class=o>*</span> <span class=n>b</span><span class=p>.</span><span class=n>value</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>a</span><span class=p>.</span><span class=n>value</span> <span class=o>*</span> <span class=n>b</span><span class=p>.</span><span class=n>deriv</span> <span class=o>+</span> <span class=n>a</span><span class=p>.</span><span class=n>deriv</span> <span class=o>*</span> <span class=n>b</span><span class=p>.</span><span class=n>value</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kr>inline</span> <span class=n>Dual</span> <span class=k>operator</span><span class=o>/</span><span class=p>(</span><span class=k>const</span> <span class=n>Dual</span><span class=o>&amp;</span> <span class=n>a</span><span class=p>,</span> <span class=k>const</span> <span class=n>Dual</span><span class=o>&amp;</span> <span class=n>b</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=nf>Dual</span><span class=p>(</span><span class=n>a</span><span class=p>.</span><span class=n>value</span> <span class=o>/</span> <span class=n>b</span><span class=p>.</span><span class=n>value</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=p>(</span><span class=n>a</span><span class=p>.</span><span class=n>deriv</span> <span class=o>*</span> <span class=n>b</span><span class=p>.</span><span class=n>value</span> <span class=o>-</span> <span class=n>a</span><span class=p>.</span><span class=n>value</span> <span class=o>*</span> <span class=n>b</span><span class=p>.</span><span class=n>deriv</span><span class=p>)</span> <span class=o>/</span> <span class=p>(</span><span class=n>b</span><span class=p>.</span><span class=n>value</span> <span class=o>*</span> <span class=n>b</span><span class=p>.</span><span class=n>value</span><span class=p>));</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=初等函数运算规则>初等函数运算规则</h3><p>类似 <code>sin(x)</code> 和 <code>exp(x)</code> 这种初等函数，无法使用之前的两条定义给出新的运算规则。这里我们引入<strong>泰勒公式</strong>：</p>$$
+f(x_0 + \Delta x) = f(x_0) + f'(x_0)\Delta x + \frac{f''(x_0)}{2!}(\Delta x)^2 + \cdots
+$$<p>任何初等函数都可以使用泰勒公式展开。令 $\Delta x = \varepsilon$，由于 $\varepsilon^2 = 0$，只需保留常数项和一次项即可。按照这种方法，可以轻松定义所有初等函数：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=c1>// 三角函数
+</span></span></span><span class=line><span class=cl><span class=kr>inline</span> <span class=n>Dual</span> <span class=nf>sin</span><span class=p>(</span><span class=k>const</span> <span class=n>Dual</span><span class=o>&amp;</span> <span class=n>x</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>Dual</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>sin</span><span class=p>(</span><span class=n>x</span><span class=p>.</span><span class=n>value</span><span class=p>),</span> <span class=n>std</span><span class=o>::</span><span class=n>cos</span><span class=p>(</span><span class=n>x</span><span class=p>.</span><span class=n>value</span><span class=p>)</span> <span class=o>*</span> <span class=n>x</span><span class=p>.</span><span class=n>deriv</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kr>inline</span> <span class=n>Dual</span> <span class=nf>cos</span><span class=p>(</span><span class=k>const</span> <span class=n>Dual</span><span class=o>&amp;</span> <span class=n>x</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>Dual</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>cos</span><span class=p>(</span><span class=n>x</span><span class=p>.</span><span class=n>value</span><span class=p>),</span> <span class=o>-</span><span class=n>std</span><span class=o>::</span><span class=n>sin</span><span class=p>(</span><span class=n>x</span><span class=p>.</span><span class=n>value</span><span class=p>)</span> <span class=o>*</span> <span class=n>x</span><span class=p>.</span><span class=n>deriv</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 指数和对数
+</span></span></span><span class=line><span class=cl><span class=kr>inline</span> <span class=n>Dual</span> <span class=nf>exp</span><span class=p>(</span><span class=k>const</span> <span class=n>Dual</span><span class=o>&amp;</span> <span class=n>x</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>double</span> <span class=n>exp_val</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>exp</span><span class=p>(</span><span class=n>x</span><span class=p>.</span><span class=n>value</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>Dual</span><span class=p>(</span><span class=n>exp_val</span><span class=p>,</span> <span class=n>exp_val</span> <span class=o>*</span> <span class=n>x</span><span class=p>.</span><span class=n>deriv</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kr>inline</span> <span class=n>Dual</span> <span class=nf>log</span><span class=p>(</span><span class=k>const</span> <span class=n>Dual</span><span class=o>&amp;</span> <span class=n>x</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>Dual</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>log</span><span class=p>(</span><span class=n>x</span><span class=p>.</span><span class=n>value</span><span class=p>),</span> <span class=n>x</span><span class=p>.</span><span class=n>deriv</span> <span class=o>/</span> <span class=n>x</span><span class=p>.</span><span class=n>value</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 幂函数
+</span></span></span><span class=line><span class=cl><span class=kr>inline</span> <span class=n>Dual</span> <span class=nf>pow</span><span class=p>(</span><span class=k>const</span> <span class=n>Dual</span><span class=o>&amp;</span> <span class=n>x</span><span class=p>,</span> <span class=kt>double</span> <span class=n>n</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>double</span> <span class=n>pow_val</span> <span class=o>=</span> <span class=n>std</span><span class=o>::</span><span class=n>pow</span><span class=p>(</span><span class=n>x</span><span class=p>.</span><span class=n>value</span><span class=p>,</span> <span class=n>n</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>Dual</span><span class=p>(</span><span class=n>pow_val</span><span class=p>,</span> <span class=n>n</span> <span class=o>*</span> <span class=n>std</span><span class=o>::</span><span class=n>pow</span><span class=p>(</span><span class=n>x</span><span class=p>.</span><span class=n>value</span><span class=p>,</span> <span class=n>n</span> <span class=o>-</span> <span class=mi>1</span><span class=p>)</span> <span class=o>*</span> <span class=n>x</span><span class=p>.</span><span class=n>deriv</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 反三角函数
+</span></span></span><span class=line><span class=cl><span class=kr>inline</span> <span class=n>Dual</span> <span class=nf>asin</span><span class=p>(</span><span class=k>const</span> <span class=n>Dual</span><span class=o>&amp;</span> <span class=n>x</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>Dual</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>asin</span><span class=p>(</span><span class=n>x</span><span class=p>.</span><span class=n>value</span><span class=p>),</span> <span class=n>x</span><span class=p>.</span><span class=n>deriv</span> <span class=o>/</span> <span class=n>std</span><span class=o>::</span><span class=n>sqrt</span><span class=p>(</span><span class=mi>1</span> <span class=o>-</span> <span class=n>x</span><span class=p>.</span><span class=n>value</span> <span class=o>*</span> <span class=n>x</span><span class=p>.</span><span class=n>value</span><span class=p>));</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kr>inline</span> <span class=n>Dual</span> <span class=nf>acos</span><span class=p>(</span><span class=k>const</span> <span class=n>Dual</span><span class=o>&amp;</span> <span class=n>x</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>Dual</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>acos</span><span class=p>(</span><span class=n>x</span><span class=p>.</span><span class=n>value</span><span class=p>),</span> <span class=o>-</span><span class=n>x</span><span class=p>.</span><span class=n>deriv</span> <span class=o>/</span> <span class=n>std</span><span class=o>::</span><span class=n>sqrt</span><span class=p>(</span><span class=mi>1</span> <span class=o>-</span> <span class=n>x</span><span class=p>.</span><span class=n>value</span> <span class=o>*</span> <span class=n>x</span><span class=p>.</span><span class=n>value</span><span class=p>));</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kr>inline</span> <span class=n>Dual</span> <span class=nf>atan</span><span class=p>(</span><span class=k>const</span> <span class=n>Dual</span><span class=o>&amp;</span> <span class=n>x</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>Dual</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>atan</span><span class=p>(</span><span class=n>x</span><span class=p>.</span><span class=n>value</span><span class=p>),</span> <span class=n>x</span><span class=p>.</span><span class=n>deriv</span> <span class=o>/</span> <span class=p>(</span><span class=mi>1</span> <span class=o>+</span> <span class=n>x</span><span class=p>.</span><span class=n>value</span> <span class=o>*</span> <span class=n>x</span><span class=p>.</span><span class=n>value</span><span class=p>));</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=前向自动微分>前向自动微分</h2><h3 id=单变量全导>单变量全导</h3><p>定义了对偶数，下一步就是使用已定义好的初等函数，构造待求导的函数：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=n>Dual</span> <span class=nf>f</span><span class=p>(</span><span class=n>Dual</span> <span class=n>x</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>x</span> <span class=o>+</span> <span class=n>x</span> <span class=o>*</span> <span class=n>x</span> <span class=o>+</span> <span class=n>pow</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=mi>3</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>计算时只需设置 <code>x.deriv = 1</code>，即为自变量 $x$ 添加一个最小量。在计算过程中，最小量由自变量传递到因变量，最终得到 <code>y.deriv</code> 即为导数值。</p><h3 id=多变量偏导>多变量偏导</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=n>Dual</span> <span class=nf>g</span><span class=p>(</span><span class=n>Dual</span> <span class=n>x</span><span class=p>,</span> <span class=n>Dual</span> <span class=n>y</span><span class=p>,</span> <span class=n>Dual</span> <span class=n>z</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>pow</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=mi>3</span><span class=p>)</span> <span class=o>+</span> <span class=n>pow</span><span class=p>(</span><span class=n>y</span><span class=p>,</span> <span class=mi>2</span><span class=p>)</span> <span class=o>+</span> <span class=n>z</span> <span class=o>+</span> <span class=n>cos</span><span class=p>(</span><span class=n>x</span> <span class=o>*</span> <span class=n>y</span> <span class=o>*</span> <span class=n>z</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>当出现多个自变量时，依次遍历每个自变量，分别将 <code>deriv = 1</code> 写入，即可得到每个自变量的偏导。依次写入向量，得到的就是该函数的<strong>梯度</strong>。</p><h3 id=模板处理函数>模板处理函数</h3><p>最后使用模板，不限制自变量的数量：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=n>ADResult</span> <span class=nf>diff</span><span class=p>(</span><span class=k>const</span> <span class=n>Func</span><span class=o>&amp;</span> <span class=n>f</span><span class=p>,</span> <span class=n>Args</span><span class=p>...</span> <span class=n>args</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>ADResult</span> <span class=n>res</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>constexpr</span> <span class=n>size_t</span> <span class=n>N</span> <span class=o>=</span> <span class=k>sizeof</span><span class=p>...(</span><span class=n>Args</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>res</span><span class=p>.</span><span class=n>gradient</span><span class=p>.</span><span class=n>resize</span><span class=p>(</span><span class=n>N</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 1. 计算函数值（所有导数为 0）
+</span></span></span><span class=line><span class=cl>    <span class=n>Dual</span> <span class=n>value_res</span> <span class=o>=</span> <span class=n>f</span><span class=p>(</span><span class=n>Dual</span><span class=p>((</span><span class=kt>double</span><span class=p>)</span><span class=n>args</span><span class=p>,</span> <span class=mf>0.0</span><span class=p>)...);</span>
+</span></span><span class=line><span class=cl>    <span class=n>res</span><span class=p>.</span><span class=n>value</span> <span class=o>=</span> <span class=n>value_res</span><span class=p>.</span><span class=n>value</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 2. 对每个输入变量求偏导（seed 依次设为 1）
+</span></span></span><span class=line><span class=cl>    <span class=kt>double</span> <span class=n>args_arr</span><span class=p>[]</span> <span class=o>=</span> <span class=p>{</span> <span class=p>(</span><span class=kt>double</span><span class=p>)</span><span class=n>args</span><span class=p>...</span> <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 梯度
+</span></span></span><span class=line><span class=cl>    <span class=p>[</span><span class=o>&amp;</span><span class=p>]</span><span class=o>&lt;</span><span class=n>size_t</span><span class=p>...</span> <span class=n>Is</span><span class=o>&gt;</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>index_sequence</span><span class=o>&lt;</span><span class=n>Is</span><span class=p>...</span><span class=o>&gt;</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=p>([</span><span class=o>&amp;</span><span class=p>]()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=c1>// 创建 Dual 输入，第 Is 个变量导数=1，其余=0
+</span></span></span><span class=line><span class=cl>            <span class=n>Dual</span> <span class=n>inputs</span><span class=p>[</span><span class=n>N</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>            <span class=k>for</span> <span class=p>(</span><span class=n>size_t</span> <span class=n>j</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>j</span> <span class=o>&lt;</span> <span class=n>N</span><span class=p>;</span> <span class=o>++</span><span class=n>j</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                <span class=n>inputs</span><span class=p>[</span><span class=n>j</span><span class=p>]</span> <span class=o>=</span> <span class=n>Dual</span><span class=p>(</span><span class=n>args_arr</span><span class=p>[</span><span class=n>j</span><span class=p>],</span> <span class=n>j</span> <span class=o>==</span> <span class=n>Is</span> <span class=o>?</span> <span class=mf>1.0</span> <span class=o>:</span> <span class=mf>0.0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=c1>// 用内层 index_sequence 展开所有 N 个参数传给 f
+</span></span></span><span class=line><span class=cl>            <span class=n>res</span><span class=p>.</span><span class=n>gradient</span><span class=p>[</span><span class=n>Is</span><span class=p>]</span> <span class=o>=</span> <span class=p>[</span><span class=o>&amp;</span><span class=p>]</span><span class=o>&lt;</span><span class=n>size_t</span><span class=p>...</span> <span class=n>Js</span><span class=o>&gt;</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>index_sequence</span><span class=o>&lt;</span><span class=n>Js</span><span class=p>...</span><span class=o>&gt;</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=k>return</span> <span class=n>f</span><span class=p>(</span><span class=n>inputs</span><span class=p>[</span><span class=n>Js</span><span class=p>]...).</span><span class=n>deriv</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=p>}(</span><span class=n>std</span><span class=o>::</span><span class=n>make_index_sequence</span><span class=o>&lt;</span><span class=n>N</span><span class=o>&gt;</span><span class=p>{});</span>
+</span></span><span class=line><span class=cl>        <span class=p>}(),</span> <span class=p>...);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}(</span><span class=n>std</span><span class=o>::</span><span class=n>make_index_sequence</span><span class=o>&lt;</span><span class=n>N</span><span class=o>&gt;</span><span class=p>{});</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 散度
+</span></span></span><span class=line><span class=cl>    <span class=n>res</span><span class=p>.</span><span class=n>divergence</span> <span class=o>=</span> <span class=mf>0.0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>[</span><span class=o>&amp;</span><span class=p>]</span><span class=o>&lt;</span><span class=n>size_t</span><span class=p>...</span> <span class=n>Is</span><span class=o>&gt;</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>index_sequence</span><span class=o>&lt;</span><span class=n>Is</span><span class=p>...</span><span class=o>&gt;</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=p>([</span><span class=o>&amp;</span><span class=p>]()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>res</span><span class=p>.</span><span class=n>divergence</span> <span class=o>+=</span> <span class=p>[</span><span class=o>&amp;</span><span class=p>]</span><span class=o>&lt;</span><span class=n>size_t</span><span class=p>...</span> <span class=n>Js</span><span class=o>&gt;</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>index_sequence</span><span class=o>&lt;</span><span class=n>Js</span><span class=p>...</span><span class=o>&gt;</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>                <span class=k>return</span> <span class=n>res</span><span class=p>.</span><span class=n>gradient</span><span class=p>[</span><span class=n>Is</span><span class=p>];</span> <span class=c1>// 这里直接用梯度值，因为散度是梯度的和
+</span></span></span><span class=line><span class=cl>            <span class=p>}(</span><span class=n>std</span><span class=o>::</span><span class=n>make_index_sequence</span><span class=o>&lt;</span><span class=n>N</span><span class=o>&gt;</span><span class=p>{});</span>
+</span></span><span class=line><span class=cl>        <span class=p>}(),</span> <span class=p>...);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}(</span><span class=n>std</span><span class=o>::</span><span class=n>make_index_sequence</span><span class=o>&lt;</span><span class=n>N</span><span class=o>&gt;</span><span class=p>{});</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>res</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=后向自动微分>后向自动微分</h2><p>学习了前向自动微分，我们不难发现：求函数的偏导，需要遍历所有的自变量才可以。当自变量数量非常大，而因变量的数量比较少时，可以使用<strong>后向自动微分</strong>。</p><p>本质上两者的原理一样，后向自动微分是在遍历因变量的基础上，加入了链式法则。</p><h3 id=链式节点>链式节点</h3><p>前向自动微分中，对偶数在计算过程中同时携带了数值和导数。</p><p>在后向自动微分中，我们无法直接通过自变量的变化计算因变量。因此，首先进行一次正向计算，将数值和计算方法存入每一级中，让每一步计算变成一个<strong>节点</strong>。</p><p>正向走到因变量处后，依次为每个因变量提供一个最小量，通过每一级节点中保存的计算公式，倒推前一级对后一级变化的贡献。贡献由因变量层通过中间的节点传递到最表层，即可通过遍历因变量，直接确定自变量的梯度。</p><p>以 $f(x, y) = x \times y + \sin(x)$ 为例，其计算过程如下：</p><pre class=mermaid>
+  graph LR
+    x --&gt; v2[&#34;x × y&#34;]
+    y --&gt; v2
+    x --&gt; v3[&#34;sin(x)&#34;]
+    v3 --&gt; v4[&#34;x × y + sin(x)&#34;]
+    v2 --&gt; v4
+</pre><h3 id=节点定义>节点定义</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=k>struct</span> <span class=nc>Node</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>shared_ptr</span><span class=o>&lt;</span><span class=n>NodeData</span><span class=o>&gt;</span> <span class=n>ptr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>Node</span><span class=p>()</span> <span class=o>=</span> <span class=k>default</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>explicit</span> <span class=nf>Node</span><span class=p>(</span><span class=kt>double</span> <span class=n>v</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kt>double</span> <span class=nf>value</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>double</span> <span class=nf>gradient</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=nf>add_gradient</span><span class=p>(</span><span class=kt>double</span> <span class=n>g</span><span class=p>)</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>void</span> <span class=nf>set_gradient</span><span class=p>(</span><span class=kt>double</span> <span class=n>g</span><span class=p>)</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>const</span> <span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>Node</span><span class=o>&gt;&amp;</span> <span class=n>inputs</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>Node</span><span class=o>&gt;&amp;</span> <span class=n>inputs</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>function</span><span class=o>&lt;</span><span class=kt>void</span><span class=p>()</span><span class=o>&gt;&amp;</span> <span class=n>backward</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=k>const</span> <span class=n>std</span><span class=o>::</span><span class=n>function</span><span class=o>&lt;</span><span class=kt>void</span><span class=p>()</span><span class=o>&gt;&amp;</span> <span class=n>backward</span><span class=p>()</span> <span class=k>const</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>struct</span> <span class=nc>NodeData</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>double</span> <span class=n>value</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>double</span> <span class=n>gradient</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>Node</span><span class=o>&gt;</span> <span class=n>inputs</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>function</span><span class=o>&lt;</span><span class=kt>void</span><span class=p>()</span><span class=o>&gt;</span> <span class=n>backward</span><span class=p>;</span>  <span class=c1>// 正向时保存计算函数，反向时调用
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>explicit</span> <span class=nf>NodeData</span><span class=p>(</span><span class=kt>double</span> <span class=n>v</span><span class=p>)</span> <span class=o>:</span> <span class=n>value</span><span class=p>(</span><span class=n>v</span><span class=p>),</span> <span class=n>gradient</span><span class=p>(</span><span class=mf>0.0</span><span class=p>)</span> <span class=p>{}</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=计算过程>计算过程</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=line><span class=cl><span class=k>template</span> <span class=o>&lt;</span><span class=k>typename</span> <span class=n>Func</span><span class=p>,</span> <span class=k>typename</span><span class=p>...</span> <span class=n>Args</span><span class=o>&gt;</span>
+</span></span><span class=line><span class=cl><span class=n>ADResult</span> <span class=n>diff</span><span class=p>(</span><span class=k>const</span> <span class=n>Func</span> <span class=n>f</span><span class=p>,</span> <span class=n>Args</span><span class=p>...</span> <span class=n>args</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=n>ADResult</span> <span class=n>res</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 1. 创建输入节点
+</span></span></span><span class=line><span class=cl>    <span class=n>std</span><span class=o>::</span><span class=n>vector</span><span class=o>&lt;</span><span class=n>Node</span><span class=o>&gt;</span> <span class=n>inputs</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>inputs</span><span class=p>.</span><span class=n>reserve</span><span class=p>(</span><span class=k>sizeof</span><span class=p>...(</span><span class=n>Args</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>    <span class=p>(</span><span class=n>inputs</span><span class=p>.</span><span class=n>emplace_back</span><span class=p>((</span><span class=kt>double</span><span class=p>)</span><span class=n>args</span><span class=p>),</span> <span class=p>...);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 2. 正向计算
+</span></span></span><span class=line><span class=cl>    <span class=n>Node</span> <span class=n>output</span> <span class=o>=</span> <span class=p>[</span><span class=o>&amp;</span><span class=p>]</span><span class=o>&lt;</span><span class=n>size_t</span><span class=p>...</span> <span class=n>Is</span><span class=o>&gt;</span><span class=p>(</span><span class=n>std</span><span class=o>::</span><span class=n>index_sequence</span><span class=o>&lt;</span><span class=n>Is</span><span class=p>...</span><span class=o>&gt;</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=nf>f</span><span class=p>(</span><span class=n>inputs</span><span class=p>[</span><span class=n>Is</span><span class=p>]...);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}(</span><span class=n>std</span><span class=o>::</span><span class=n>make_index_sequence</span><span class=o>&lt;</span><span class=k>sizeof</span><span class=p>...(</span><span class=n>Args</span><span class=p>)</span><span class=o>&gt;</span><span class=p>{});</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 3. 反向传播
+</span></span></span><span class=line><span class=cl>    <span class=n>backward</span><span class=p>(</span><span class=n>output</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 4. 提取结果
+</span></span></span><span class=line><span class=cl>    <span class=n>res</span><span class=p>.</span><span class=n>value</span> <span class=o>=</span> <span class=n>output</span><span class=p>.</span><span class=n>value</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=k>auto</span><span class=o>&amp;</span> <span class=nl>in</span> <span class=p>:</span> <span class=n>inputs</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>res</span><span class=p>.</span><span class=n>gradient</span><span class=p>.</span><span class=n>push_back</span><span class=p>(</span><span class=n>in</span><span class=p>.</span><span class=n>gradient</span><span class=p>());</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 散度
+</span></span></span><span class=line><span class=cl>    <span class=n>res</span><span class=p>.</span><span class=n>divergence</span> <span class=o>=</span> <span class=mf>0.0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=k>const</span> <span class=k>auto</span><span class=o>&amp;</span> <span class=nl>g</span> <span class=p>:</span> <span class=n>res</span><span class=p>.</span><span class=n>gradient</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>res</span><span class=p>.</span><span class=n>divergence</span> <span class=o>+=</span> <span class=n>g</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 旋度（标量场的旋度始终为 0）
+</span></span></span><span class=line><span class=cl>    <span class=n>res</span><span class=p>.</span><span class=n>curl</span><span class=p>.</span><span class=n>resize</span><span class=p>(</span><span class=n>inputs</span><span class=p>.</span><span class=n>size</span><span class=p>());</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=n>size_t</span> <span class=n>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=n>i</span> <span class=o>&lt;</span> <span class=n>inputs</span><span class=p>.</span><span class=n>size</span><span class=p>();</span> <span class=o>++</span><span class=n>i</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>res</span><span class=p>.</span><span class=n>curl</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=mf>0.0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>res</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div></section><footer class=article-footer><section class=article-tags><a href=/tags/algorithm/>Algorithm</a></section><section class=article-copyright><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css integrity=sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV crossorigin=anonymous><script src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js integrity=sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8 crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js integrity=sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05 crossorigin=anonymous defer></script><script>window.addEventListener("DOMContentLoaded",()=>{const e=[".main-article",".widget--toc"];e.forEach(e=>{const t=document.querySelector(e);t&&renderMathInElement(t,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\(",right:"\\)",display:!1},{left:"\\[",right:"\\]",display:!0}],ignoredClasses:["gist"]})})})</script></article><aside class=related-content--wrapper><h2 class=section-title>相关文章</h2><div class=related-content><div class="flex article-list--tile"><article class=has-image><a href=/p/vector-fitting/><div class=article-image><img src=/p/vector-fitting/cover.c514d916917173a48a42e0114b469961_hu_cd6a07a0d3af7b3e.jpg width=250 height=150 loading=lazy alt="Featured image of post Vector Fitting" data-key=vector-fitting data-hash="md5-xRTZFpFxc6SKQuARS0aZYQ=="></div><div class=article-details><h2 class=article-title>Vector Fitting</h2></div></a></article></div></div></aside><div id=gitalk-container></div><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css><script src=https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js></script><script src=https://cdn.jsdelivr.net/npm/blueimp-md5@2.18.0/js/md5.min.js></script><script>const gitalk=new Gitalk({clientID:"Ov23liLyreuSeniqPEgb",clientSecret:"1aaad0bef09c19d35aeea4bc78f7b324583c0eda",repo:"m4ygem1ni.github.io",owner:"M4yGem1ni",admin:["[M4yGem1ni]"],distractionFreeMode:!1,id:md5(location.pathname),proxy:null});(function(){const e=["localhost","127.0.0.1"],t=window.location.hostname;if(e.includes(t)){document.getElementById("gitalk-container").innerHTML="Gitalk comments not available by default when the website is previewed locally.";return}gitalk.render("gitalk-container")})()</script><footer class=site-footer><section class=copyright>&copy;
+2020 -
+2026 This is MayGemini.</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.33.0>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.c922af694cc257bf1ecc41c0dd7b0430f9114ec280ccf67cd2c6ad55f5316c4e.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>
