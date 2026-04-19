@@ -1,6 +1,6 @@
 ---
-title: Example Category
-description: A description of this category
+title: Life Category
+description: At the end of my student life
 image:
 
 # Badge style
