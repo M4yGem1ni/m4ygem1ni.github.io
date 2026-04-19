@@ -1,7 +1,7 @@
 ---
 title: Life Category
 description: At the end of my student life
-image:
+image: pexels-43381756-7462760.jpg
 
 # Badge style
 style:
